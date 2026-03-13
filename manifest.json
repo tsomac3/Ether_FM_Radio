@@ -2,7 +2,7 @@
   "name": "ETHER FM — Internet Radio",
   "short_name": "ETHER FM",
   "description": "Internet radio player with genre search",
-  "start_url": "/radio/",
+  "start_url": "/radio/index.html",
   "scope": "/radio/",
   "display": "standalone",
   "background_color": "#0a0a0c",
