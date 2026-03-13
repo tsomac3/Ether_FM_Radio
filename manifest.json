@@ -1,0 +1,19 @@
+{
+  "name": "ETHER FM — Internet Radio",
+  "short_name": "ETHER FM",
+  "description": "Internet radio player with genre search",
+  "start_url": "/radio/",
+  "scope": "/radio/",
+  "display": "standalone",
+  "background_color": "#0a0a0c",
+  "theme_color": "#e8a030",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
