@@ -48,33 +48,37 @@ body.playing .dot:nth-child(2){animation-delay:.15s;} body.playing .dot:nth-chil
 #np-genre{font-size:11px;color:var(--accent);font-family:'Space Mono',monospace;margin-top:1px;}
 
 /* CONTROLS */
-#ctrl{background:var(--surface);border-bottom:1px solid var(--border);padding:12px 20px;display:flex;align-items:center;gap:16px;flex-shrink:0;}
+#ctrl{background:var(--surface);border-bottom:1px solid var(--border);padding:12px 20px;display:flex;align-items:center;gap:12px;flex-shrink:0;}
 .cbtn{border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;border-radius:50%;transition:all .15s;flex-shrink:0;}
 #bp{width:52px;height:52px;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#000;box-shadow:0 4px 18px rgba(232,160,48,.3);}
 #bp:active{transform:scale(.93);}
-#bm{width:40px;height:40px;background:var(--card);color:var(--text);border:1px solid var(--border);margin-left:auto;}
+#bm{width:40px;height:40px;background:var(--card);color:var(--text);border:1px solid var(--border);}
 #bm.muted{color:var(--danger);border-color:var(--danger);} #bm:active{transform:scale(.93);}
+#bfav{width:40px;height:40px;background:var(--card);color:var(--text);border:1px solid var(--border);}
+#bfav.active{color:var(--accent);border-color:var(--accent);} #bfav:active{transform:scale(.93);}
+
 .vwrap{display:flex;align-items:center;gap:10px;flex:1;}
 #vol{-webkit-appearance:none;appearance:none;width:100%;height:4px;background:var(--border);border-radius:2px;outline:none;cursor:pointer;}
 #vol::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:var(--accent);cursor:pointer;box-shadow:0 0 0 4px rgba(232,160,48,.2);}
 
 /* STATUS */
 #sb{padding:5px 20px;font-size:11px;font-family:'Space Mono',monospace;color:var(--muted);background:var(--bg);flex-shrink:0;min-height:22px;}
-#sb.err{color:var(--danger);} #sb.ok{color:var(--playing);}
+#sb.err{color:var(--danger);} #sb.ok{color:var(--playing);} #sb.warn{color:#e8a030;}
 
-/* SEARCH */
+/* DROPDOWNS & SEARCH */
+.dd { width:100%;background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:10px 14px;color:var(--text);font-family:'Space Mono',monospace;font-size:13px;outline:none;cursor:pointer;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236a6a80' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;transition:border-color .2s; }
+.dd:focus { border-color:var(--accent); }
+.dd option { background:var(--card); color:var(--text); }
+
+.fav-wrap { padding: 10px 16px 0; flex-shrink:0; }
+.gd-wrap { padding: 0 16px 10px; flex-shrink:0; }
+
 .sa{flex-shrink:0;padding:10px 16px 8px;}
 .sr{display:flex;gap:8px;}
 #gi{flex:1;background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:10px 14px;color:var(--text);font-family:'Syne',sans-serif;font-size:15px;outline:none;transition:border-color .2s;}
 #gi::placeholder{color:var(--muted);} #gi:focus{border-color:var(--accent);}
 #sb-btn{background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;border-radius:var(--r);padding:10px 18px;color:#000;font-family:'Syne',sans-serif;font-weight:700;font-size:14px;cursor:pointer;white-space:nowrap;}
 #sb-btn:active{opacity:.8;}
-
-/* GENRE DROPDOWN */
-.gd-wrap{padding:0 16px 10px;flex-shrink:0;}
-#gd{width:100%;background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:10px 14px;color:var(--text);font-family:'Space Mono',monospace;font-size:13px;outline:none;cursor:pointer;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236a6a80' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;transition:border-color .2s;}
-#gd:focus{border-color:var(--accent);}
-#gd option{background:var(--card);color:var(--text);}
 
 /* STATIONS */
 #list{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:0 12px 16px;}
@@ -89,7 +93,10 @@ body.playing .dot:nth-child(2){animation-delay:.15s;} body.playing .dot:nth-chil
 .sinfo{flex:1;min-width:0;}
 .sname{font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .smeta{font-size:10px;color:var(--muted);font-family:'Space Mono',monospace;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.sr2{flex-shrink:0;text-align:right;}
+
+.sr2{flex-shrink:0; display:flex; flex-direction:column; align-items:flex-end; justify-content:center; gap:4px; min-width:40px;}
+.sfav{background:none;border:none;color:var(--muted);cursor:pointer;padding:2px;transition:color .2s;display:flex;align-items:center;}
+.sfav.active{color:var(--accent);} .sfav:active{transform:scale(.85);}
 .sbr{font-size:10px;font-family:'Space Mono',monospace;color:var(--muted);}
 .slive{font-size:10px;font-family:'Space Mono',monospace;color:var(--playing);display:none;}
 .sc.playing .slive{display:block;} .sc.playing .sbr{display:none;}
@@ -126,7 +133,7 @@ body.playing .dot:nth-child(2){animation-delay:.15s;} body.playing .dot:nth-chil
 </div>
 
 <div id="ctrl">
-  <button class="cbtn" id="bp" onclick="togglePlay()">
+  <button class="cbtn" id="bp" onclick="window.togglePlay()">
     <svg id="pi" width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21"/></svg>
     <svg id="pai" width="22" height="22" viewBox="0 0 24 24" fill="currentColor" style="display:none"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg>
     <svg id="li" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="display:none">
@@ -138,25 +145,36 @@ body.playing .dot:nth-child(2){animation-delay:.15s;} body.playing .dot:nth-chil
   
   <div class="vwrap">
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2"><polygon points="11,5 6,9 2,9 2,15 6,15 11,19"/></svg>
-    <input type="range" id="vol" min="0" max="100" value="80" oninput="setVol(this.value)">
+    <input type="range" id="vol" min="0" max="100" value="80" oninput="window.setVol(this.value)">
   </div>
   
-  <button class="cbtn" id="bm" onclick="toggleMute()">
+  <button class="cbtn" id="bm" onclick="window.toggleMute()">
     <svg id="mi1" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11,5 6,9 2,9 2,15 6,15 11,19"/><path d="M15.5 8.5a5 5 0 0 1 0 7M19 5a10 10 0 0 1 0 14"/></svg>
     <svg id="mi2" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none"><polygon points="11,5 6,9 2,9 2,15 6,15 11,19"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>
+  </button>
+  
+  <button class="cbtn" id="bfav" onclick="window.toggleCurrentFav()">
+    <svg id="star-empty" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+    <svg id="star-filled" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" style="display:none"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
   </button>
 </div>
 
 <div id="sb">Search a genre to find stations</div>
 
+<div class="fav-wrap">
+  <select id="fav-dd" class="dd" onchange="window.onFavSelect(this.value)">
+    <option value="">★ Favorites (0)</option>
+  </select>
+</div>
+
 <div class="sa">
   <div class="sr">
-    <input id="gi" type="text" placeholder="jazz, rock, classical, lofi…" autocomplete="off" autocorrect="off" spellcheck="false" onkeydown="if(event.key==='Enter'){this.blur();search();}">
-    <button id="sb-btn" onclick="search()">Search</button>
+    <input id="gi" type="text" placeholder="jazz, rock, classical, lofi…" autocomplete="off" autocorrect="off" spellcheck="false" onkeydown="if(event.key==='Enter'){this.blur();window.search();}">
+    <button id="sb-btn" onclick="window.search()">Search</button>
   </div>
 </div>
 
-<div class="gd-wrap"><select id="gd" onchange="onGenreSelect(this.value)"><option value="">— Select a genre —</option></select></div>
+<div class="gd-wrap"><select id="gd" class="dd" onchange="window.onGenreSelect(this.value)"><option value="">— Select a genre —</option></select></div>
 
 <div id="list">
   <div id="start">🎙 Pick a genre above<br>to find live stations worldwide</div>
@@ -167,11 +185,17 @@ body.playing .dot:nth-child(2){animation-delay:.15s;} body.playing .dot:nth-chil
 
 <audio id="au" preload="none"></audio>
 
-<script>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+import { getAuth, signInWithCustomToken, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+import { getFirestore, collection, doc, setDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
 const GENRES=['game','jazz','rock','pop','classical','electronic','hip hop','ambient','country','reggae','blues','soul','metal','punk','indie','lofi','news','talk','dance','techno','house'];
 const APIS=['https://de1.api.radio-browser.info','https://at1.api.radio-browser.info','https://nl1.api.radio-browser.info'];
 
 let host=APIS[0], cur=null, muted=false, state='stopped';
+let currentList=[]; 
+let favs=[]; 
 
 // RECONNECT VARIABLES
 let rtmr=null, rcnt=0, intentPlay=false;
@@ -179,13 +203,180 @@ let rtmr=null, rcnt=0, intentPlay=false;
 const au=document.getElementById('au');
 const $ = id => document.getElementById(id);
 
+// --- FIREBASE INIT ---
+let app, auth, db;
+let firebaseEnabled = false;
+let userId = null;
+let unsubFavs = null;
+const appId = typeof __app_id !== 'undefined' ? __app_id : 'ether-fm';
+
+const firebaseConfig = {
+  apiKey: "AIzaSyB0zaq7SlbQ9eJv11Tr5GkN1OMpGkC6IdI",
+  authDomain: "ether-fm-ade95.firebaseapp.com",
+  projectId: "ether-fm-ade95",
+  storageBucket: "ether-fm-ade95.firebasestorage.app",
+  messagingSenderId: "11968135645",
+  appId: "1:11968135645:web:b086b365fd423805a67634"
+};
+
+
+app = initializeApp(firebaseConfig);
+auth = getAuth(app);
+db = getFirestore(app);
+firebaseEnabled = true;
+
+const initAuth = async () => {
+  if (!firebaseEnabled) {
+    status('Local mode: Favorites will not sync to cloud', 'warn');
+    return; // Skip auth if running locally without keys
+  }
+  
+  try {
+    status('Connecting to cloud...', '');
+    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+      await signInWithCustomToken(auth, __initial_auth_token);
+    } else {
+      await signInAnonymously(auth);
+    }
+  } catch(e) {
+    console.error('Auth error', e);
+    firebaseEnabled = false;
+    status('Cloud connection failed, running in local mode', 'warn');
+  }
+};
+initAuth();
+
+if (firebaseEnabled) {
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      userId = user.uid;
+      status('Search a genre to find stations', '');
+      loadFavorites();
+    } else {
+      userId = null;
+      if(unsubFavs) unsubFavs();
+      favs = [];
+      updateFavDD();
+    }
+  });
+}
+
 // Populate dropdown
 GENRES.forEach(g=>{
   const o=document.createElement('option');
   o.value=g; o.textContent=g.charAt(0).toUpperCase()+g.slice(1);
   $('gd').appendChild(o);
 });
+
 function onGenreSelect(g){if(!g)return;$('gi').value=g;search();}
+
+// Get a safe ID for a station
+function getUuid(s) { return s.stationuuid || encodeURIComponent(s.url); }
+
+// FAVORITES LOGIC
+function loadFavorites() {
+  if (!firebaseEnabled || !userId) return;
+  if (unsubFavs) unsubFavs();
+  const favRef = collection(db, 'artifacts', appId, 'users', userId, 'favorites');
+  
+  unsubFavs = onSnapshot(favRef, (snap) => {
+    favs = [];
+    snap.forEach(document => favs.push(document.data()));
+    updateFavDD();
+    
+    if (cur) updateFavBtn(getUuid(cur));
+    
+    // Refresh stars on the current view list
+    currentList.forEach((s) => {
+      const uuid = getUuid(s);
+      updateListFavBtn(uuid, favs.some(f => getUuid(f) === uuid));
+    });
+  }, (err) => {
+    console.error("Failed to sync favorites", err);
+  });
+}
+
+function updateFavDD() {
+  const dd = $('fav-dd');
+  dd.innerHTML = `<option value="">★ Favorites (${favs.length})</option>`;
+  favs.forEach(f => {
+    const o = document.createElement('option');
+    o.value = getUuid(f);
+    o.textContent = f.name || 'Unknown';
+    dd.appendChild(o);
+  });
+}
+
+function onFavSelect(uuid) {
+  if(!uuid) return;
+  const s = favs.find(f => getUuid(f) === uuid);
+  if(s) play(s, -1);
+  setTimeout(() => { $('fav-dd').value = ''; }, 100); 
+}
+
+function updateFavBtn(uuid) {
+  if(!cur || getUuid(cur) !== uuid) return;
+  const isFav = favs.some(f => getUuid(f) === uuid);
+  $('star-empty').style.display = isFav ? 'none' : '';
+  $('star-filled').style.display = isFav ? '' : 'none';
+  $('bfav').classList.toggle('active', isFav);
+}
+
+function updateListFavBtn(uuid, isFav) {
+  const btn = document.getElementById(`fav-btn-${uuid}`);
+  if (btn) {
+    btn.classList.toggle('active', isFav);
+    btn.querySelector('svg').setAttribute('fill', isFav ? 'currentColor' : 'none');
+  }
+}
+
+async function toggleFavDB(station) {
+  const uuid = getUuid(station);
+  const isFav = favs.some(f => getUuid(f) === uuid);
+  
+  // Local Mode Fallback (when Firebase is disabled/missing)
+  if (!firebaseEnabled || !userId) {
+    if (isFav) {
+      favs = favs.filter(f => getUuid(f) !== uuid);
+      status('Removed from favorites (Session only)', '');
+    } else {
+      favs.push(station);
+      status('Saved to favorites (Session only)', 'ok');
+    }
+    updateFavDD();
+    if (cur) updateFavBtn(getUuid(cur));
+    updateListFavBtn(uuid, !isFav);
+    return;
+  }
+  
+  // Cloud Sync Mode
+  const safeId = encodeURIComponent(uuid).replace(/\./g, '%2E'); // Make safe for Firestore path
+  const docRef = doc(db, 'artifacts', appId, 'users', userId, 'favorites', safeId);
+  
+  try {
+    if (isFav) {
+      await deleteDoc(docRef);
+      status('Removed from cloud favorites', '');
+    } else {
+      await setDoc(docRef, station);
+      status('Saved to cloud favorites', 'ok');
+    }
+  } catch (e) {
+    console.error("Error saving favorite", e);
+    status('Error saving favorite', 'err');
+  }
+}
+
+async function toggleCurrentFav() {
+  if(!cur) { status('Select a station first', ''); return; }
+  await toggleFavDB(cur);
+}
+
+async function toggleListFav(e, i) {
+  e.stopPropagation();
+  const s = currentList[i];
+  await toggleFavDB(s);
+}
 
 // PWA install
 let dp=null;
@@ -217,6 +408,7 @@ async function search(){
 }
 
 function render(list,genre){
+  currentList = list;
   const w=$('sw');
   if(!list.length){$('empty').classList.add('on');status(`No stations for "${genre}"`,'');return;}
   status(`${list.length} stations for "${genre}"`, 'ok');
@@ -224,15 +416,35 @@ function render(list,genre){
   lbl.className='sl'; lbl.textContent=`Stations (${list.length})`;
   w.appendChild(lbl);
   list.forEach((s,i)=>{
+    const uuid = getUuid(s);
+    const isFav = favs.some(f => getUuid(f) === uuid);
     const card=document.createElement('div');
-    card.className='sc'; card.id=`sc${i}`; card.onclick=()=>play(s,i);
+    card.className='sc'; card.id=`sc-${uuid}`; 
+    card.onclick=(e)=>{
+      if(e.target.closest('.sfav')) return;
+      play(s, i);
+    };
     const tags=(s.tags||'').split(',').filter(Boolean).slice(0,2).join(' · ');
     const meta=[s.countrycode||'',tags].filter(Boolean).join(' · ');
     const br=s.bitrate?s.bitrate+'k':'';
     const icon=s.favicon&&s.favicon.startsWith('http')
       ?`<div class="si"><img src="${e(s.favicon)}" onerror="this.parentNode.innerHTML='📻'" alt=""></div>`
       :`<div class="si">📻</div>`;
-    card.innerHTML=`${icon}<div class="sinfo"><div class="sname">${e(s.name||'Unknown')}</div><div class="smeta">${e(meta)}</div></div><div class="sr2"><div class="sbr">${br}</div><div class="slive">▶ LIVE</div></div>`;
+      
+    card.innerHTML=`
+      ${icon}
+      <div class="sinfo">
+        <div class="sname">${e(s.name||'Unknown')}</div>
+        <div class="smeta">${e(meta)}</div>
+      </div>
+      <div class="sr2">
+        <button id="fav-btn-${uuid}" class="sfav ${isFav?'active':''}" onclick="window.toggleListFav(event, ${i})">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="${isFav?'currentColor':'none'}" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        </button>
+        <div class="sbr">${br}</div>
+        <div class="slive">▶ LIVE</div>
+      </div>
+    `;
     w.appendChild(card);
   });
 }
@@ -256,14 +468,18 @@ function tryRec(){
 }
 
 function play(s,i){
-  if(cur?.i===i&&state!=='stopped'){togglePlay();return;}
-  stop(false); cur={...s,i};
+  const uuid = getUuid(s);
+  if(cur && getUuid(cur)===uuid && state!=='stopped'){togglePlay();return;}
+  stopRadio(false); cur={...s, i};
   
   intentPlay=true; clrRec(); // Track user intent
   
   document.querySelectorAll('.sc').forEach(c=>c.classList.remove('playing'));
-  const card=$(`sc${i}`);
+  const card=document.getElementById(`sc-${uuid}`);
   if(card){card.classList.add('playing');card.scrollIntoView({behavior:'smooth',block:'nearest'});}
+  
+  updateFavBtn(uuid);
+  
   $('np').classList.add('on');
   $('np-name').textContent=s.name||'Unknown';
   const tags=(s.tags||'').split(',').filter(Boolean).slice(0,3).join(' · ');
@@ -291,11 +507,15 @@ function togglePlay(){
 function stopRadio(clear=true){
   intentPlay=false; clrRec(); // Clear user intent & timers
   au.pause();au.src='';
-  if(clear){cur=null;$('np').classList.remove('on');status('Stopped','');}
+  if(clear){
+    cur=null;
+    $('np').classList.remove('on');
+    updateFavBtn('null'); // Reset star
+    status('Stopped','');
+  }
   document.querySelectorAll('.sc').forEach(c=>c.classList.remove('playing'));
   setStopped();
 }
-function stop(c=true){stopRadio(c);}
 
 function setVol(v){
   au.volume=v/100;
@@ -324,7 +544,11 @@ au.addEventListener('pause',()=>{if(state!=='stopped')setPaused();});
 
 au.addEventListener('error',()=>{
   if(intentPlay) tryRec();
-  else { status('Stream error — try another','err');setStopped();if(cur)$(`sc${cur.i}`)?.classList.remove('playing'); }
+  else { 
+    status('Stream error — try another','err');
+    setStopped();
+    if(cur) document.getElementById(`sc-${getUuid(cur)}`)?.classList.remove('playing'); 
+  }
 });
 
 // Live streams shouldn't usually fire ended, if they do, it's a disconnect.
@@ -345,18 +569,28 @@ window.addEventListener('online', ()=>{
   if(intentPlay){clrRec(); tryRec();} // Immediate attempt when internet returns
 });
 
+// EXPORT TO GLOBAL SCOPE FOR HTML ONCLICK BINDINGS
+window.togglePlay = togglePlay;
+window.setVol = setVol;
+window.toggleMute = toggleMute;
+window.search = search;
+window.onGenreSelect = onGenreSelect;
+window.onFavSelect = onFavSelect;
+window.toggleCurrentFav = toggleCurrentFav;
+window.toggleListFav = toggleListFav;
 </script>
 
 <!-- Inline Service Worker for offline shell caching -->
 <script>
 if('serviceWorker'in navigator){
   const sw=`
-    const C='ether-v1';
+    const C='ether-v2';
     self.addEventListener('install',e=>{e.waitUntil(caches.open(C).then(c=>c.addAll([self.location.pathname])));self.skipWaiting();});
     self.addEventListener('activate',e=>{e.waitUntil(self.clients.claim());});
     self.addEventListener('fetch',e=>{
       const u=e.request.url;
-      if(u.includes('radio-browser')||u.includes('fonts.gstatic')||u.includes('fonts.googleapis'))return;
+      // Exclude streams, fonts, and Firebase APIs from cache
+      if(u.includes('radio-browser')||u.includes('fonts')||u.includes('gstatic')||u.includes('googleapis')||u.includes('firebase'))return;
       e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request).catch(()=>caches.match(self.location.pathname))));
     });
   `;
