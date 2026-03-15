@@ -41,7 +41,7 @@ body.playing .dot{background:var(--playing);animation:pb .8s ease-in-out infinit
 body.playing .dot:nth-child(2){animation-delay:.15s;} body.playing .dot:nth-child(3){animation-delay:.3s;} body.playing .dot:nth-child(4){animation-delay:.45s;}
 @keyframes pb{from{opacity:.4;transform:scaleY(.6);}to{opacity:1;transform:scaleY(1);}}
 
-#auth-btn {display:block; background:var(--card); color:var(--text); border:1px solid var(--border); border-radius:6px; padding:6px 10px; font-family:'Space Mono',monospace; font-size:10px; font-weight:700; cursor:pointer; transition:all .2s;}
+#auth-btn {display:none; background:var(--card); color:var(--text); border:1px solid var(--border); border-radius:6px; padding:6px 10px; font-family:'Space Mono',monospace; font-size:10px; font-weight:700; cursor:pointer; transition:all .2s;}
 #auth-btn:active {transform:scale(0.95);}
 #auth-btn.signed-in {color:var(--playing); border-color:var(--playing);}
 #auth-btn.disabled {opacity:0.5; cursor:not-allowed;}
@@ -168,7 +168,7 @@ body.playing .dot:nth-child(2){animation-delay:.15s;} body.playing .dot:nth-chil
   </button>
 </div>
 
-<div id="sb">Loading...</div>
+<div id="sb">Checking session...</div>
 
 <div class="fav-wrap">
   <select id="fav-dd" class="dd" onchange="window.onFavSelect(this.value)">
@@ -224,10 +224,8 @@ const provider = new GoogleAuthProvider();
 provider.setCustomParameters({ prompt: 'select_account' });
 const appId = typeof __app_id !== 'undefined' ? __app_id : 'ether-fm';
 
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
-
 // Your web app's Firebase configuration
+
 const firebaseConfig = {
   apiKey: "AIzaSyB0zaq7SlbQ9eJv11Tr5GkN1OMpGkC6IdI",
   authDomain: "ether-fm-ade95.firebaseapp.com",
@@ -245,40 +243,67 @@ firebaseEnabled = true;
 
 const authBtn = $('auth-btn');
 
-const initAuth = async () => {
-  if (!firebaseEnabled) {
-    status('Cloud sync disabled (Config missing)', 'warn');
-    authBtn.textContent = 'Setup Cloud';
-    authBtn.classList.add('disabled');
-    return;
-  }
+if (firebaseEnabled) {
+  let initialCheck = true; // Flag to gracefully check for saved sessions
   
-  try {
-    status('Connecting to cloud...', '');
-    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-      await signInWithCustomToken(auth, __initial_auth_token);
-    } else {
-      await signInAnonymously(auth);
-    }
-  } catch(e) {
-    console.error('Auth error', e);
-    firebaseEnabled = false;
+  onAuthStateChanged(auth, async (user) => {
     
-    // Check specifically for domain authorization issues
-    if (e && e.code === 'auth/unauthorized-domain') {
-      const domain = window.location.hostname;
-      const startEl = $('start');
-      startEl.innerHTML = `⚠️ <b style="color:var(--danger)">Firebase Domain Error</b><br><br>You must add <b>${domain}</b> to Firebase to enable login.<br><br><span style="color:var(--muted);font-size:10px;">Firebase Console > Authentication > Settings > Authorized domains</span>`;
-      status('Domain unauthorized', 'err');
-    } else {
-      status('Cloud connection failed', 'warn');
+    // 1. Check for missing session on initial load
+    if (initialCheck) {
+      initialCheck = false;
+      
+      // If we're in the preview environment, prioritize the custom token
+      if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+        await signInWithCustomToken(auth, __initial_auth_token);
+        return; // Listener fires again once token resolves
+      } 
+      // If no user is saved in memory, fallback to a brand new Guest account
+      else if (!user) {
+        try {
+          await signInAnonymously(auth);
+        } catch(e) {
+          console.error('Guest auth failed', e);
+          status('Cloud connection failed', 'warn');
+          authBtn.textContent = 'Auth Error';
+          authBtn.classList.add('disabled');
+        }
+        return; // Listener fires again once guest logs in
+      }
     }
     
-    authBtn.textContent = 'Auth Error';
-    authBtn.classList.add('disabled');
-  }
-};
-initAuth();
+    // 2. Normal auth state handling (runs immediately if user was remembered!)
+    authBtn.style.display = 'block';
+    
+    if (user) {
+      userId = user.uid;
+      
+      if (!user.isAnonymous) {
+        authBtn.textContent = 'Sign Out';
+        authBtn.classList.add('signed-in');
+        authBtn.classList.remove('disabled');
+      } else {
+        authBtn.textContent = 'Sign In';
+        authBtn.classList.remove('signed-in');
+        authBtn.classList.remove('disabled');
+      }
+      
+      status('Search a genre to find stations', '');
+      loadFavorites();
+    } else {
+      userId = null;
+      if(unsubFavs) unsubFavs();
+      favs = [];
+      updateFavDD();
+    }
+  });
+  
+} else {
+  // Graceful failure if no API keys exist
+  status('Cloud sync disabled (Config missing)', 'warn');
+  authBtn.textContent = 'Setup Cloud';
+  authBtn.classList.add('disabled');
+  authBtn.style.display = 'block';
+}
 
 // GOOGLE SIGN IN LOGIC
 window.signInGoogle = async () => {
@@ -288,10 +313,12 @@ window.signInGoogle = async () => {
   }
   try {
     if (auth.currentUser && !auth.currentUser.isAnonymous) {
+      // User is already signed in with Google, sign them out
       await signOut(auth);
       await signInAnonymously(auth);
       status('Signed out. Using local session.', 'ok');
     } else {
+      // Sign in with Google (will show popup)
       await signInWithPopup(auth, provider);
       status('Signed in with Google!', 'ok');
     }
@@ -306,30 +333,6 @@ window.signInGoogle = async () => {
     }
   }
 };
-
-if (firebaseEnabled) {
-  onAuthStateChanged(auth, (user) => {
-    if (user) {
-      userId = user.uid;
-      if (!user.isAnonymous) {
-        authBtn.textContent = 'Sign Out';
-        authBtn.classList.add('signed-in');
-        authBtn.classList.remove('disabled');
-      } else {
-        authBtn.textContent = 'Sign In';
-        authBtn.classList.remove('signed-in');
-        authBtn.classList.remove('disabled');
-      }
-      status('Search a genre to find stations', '');
-      loadFavorites();
-    } else {
-      userId = null;
-      if(unsubFavs) unsubFavs();
-      favs = [];
-      updateFavDD();
-    }
-  });
-}
 
 // Populate dropdown
 GENRES.forEach(g=>{
