@@ -48,15 +48,13 @@ body.playing .dot:nth-child(2){animation-delay:.15s;} body.playing .dot:nth-chil
 #np-genre{font-size:11px;color:var(--accent);font-family:'Space Mono',monospace;margin-top:1px;}
 
 /* CONTROLS */
-#ctrl{background:var(--surface);border-bottom:1px solid var(--border);padding:12px 20px;display:flex;align-items:center;gap:12px;flex-shrink:0;}
+#ctrl{background:var(--surface);border-bottom:1px solid var(--border);padding:12px 20px;display:flex;align-items:center;gap:16px;flex-shrink:0;}
 .cbtn{border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;border-radius:50%;transition:all .15s;flex-shrink:0;}
 #bp{width:52px;height:52px;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#000;box-shadow:0 4px 18px rgba(232,160,48,.3);}
 #bp:active{transform:scale(.93);}
-#bs{width:40px;height:40px;background:var(--card);color:var(--text);border:1px solid var(--border);}
-#bs:active{transform:scale(.93);background:var(--danger);color:#fff;border-color:var(--danger);}
 #bm{width:40px;height:40px;background:var(--card);color:var(--text);border:1px solid var(--border);margin-left:auto;}
 #bm.muted{color:var(--danger);border-color:var(--danger);} #bm:active{transform:scale(.93);}
-.vwrap{display:flex;align-items:center;gap:8px;flex:1;}
+.vwrap{display:flex;align-items:center;gap:10px;flex:1;}
 #vol{-webkit-appearance:none;appearance:none;width:100%;height:4px;background:var(--border);border-radius:2px;outline:none;cursor:pointer;}
 #vol::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:var(--accent);cursor:pointer;box-shadow:0 0 0 4px rgba(232,160,48,.2);}
 
@@ -137,13 +135,12 @@ body.playing .dot:nth-child(2){animation-delay:.15s;} body.playing .dot:nth-chil
       </circle>
     </svg>
   </button>
-  <button class="cbtn" id="bs" onclick="stopRadio()">
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><rect x="5" y="5" width="14" height="14" rx="2"/></svg>
-  </button>
+  
   <div class="vwrap">
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2"><polygon points="11,5 6,9 2,9 2,15 6,15 11,19"/></svg>
     <input type="range" id="vol" min="0" max="100" value="80" oninput="setVol(this.value)">
   </div>
+  
   <button class="cbtn" id="bm" onclick="toggleMute()">
     <svg id="mi1" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11,5 6,9 2,9 2,15 6,15 11,19"/><path d="M15.5 8.5a5 5 0 0 1 0 7M19 5a10 10 0 0 1 0 14"/></svg>
     <svg id="mi2" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none"><polygon points="11,5 6,9 2,9 2,15 6,15 11,19"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>
@@ -171,9 +168,14 @@ body.playing .dot:nth-child(2){animation-delay:.15s;} body.playing .dot:nth-chil
 <audio id="au" preload="none"></audio>
 
 <script>
-const GENRES=['jazz','rock','pop','classical','electronic','hip hop','ambient','country','reggae','blues','soul','metal','punk','indie','lofi','news','talk','dance','techno','house','game'];
+const GENRES=['game','jazz','rock','pop','classical','electronic','hip hop','ambient','country','reggae','blues','soul','metal','punk','indie','lofi','news','talk','dance','techno','house'];
 const APIS=['https://de1.api.radio-browser.info','https://at1.api.radio-browser.info','https://nl1.api.radio-browser.info'];
+
 let host=APIS[0], cur=null, muted=false, state='stopped';
+
+// RECONNECT VARIABLES
+let rtmr=null, rcnt=0, intentPlay=false;
+
 const au=document.getElementById('au');
 const $ = id => document.getElementById(id);
 
@@ -235,9 +237,30 @@ function render(list,genre){
   });
 }
 
+// RECONNECT LOGIC
+function clrRec(){ if(rtmr)clearTimeout(rtmr); rtmr=null; rcnt=0; }
+
+function tryRec(){
+  if(!intentPlay||!cur)return;
+  if(rtmr)clearTimeout(rtmr);
+  rcnt++;
+  status(`Reconnecting... attempt ${rcnt}`,'err');
+  setLoading();
+  rtmr=setTimeout(()=>{
+    if(!intentPlay||!cur)return;
+    status('Reconnecting...','');
+    au.load(); // Flush previous buffer
+    au.src=cur.url_resolved||cur.url;
+    au.play().catch(()=>{});
+  }, 5000); // Try again every 5 seconds
+}
+
 function play(s,i){
   if(cur?.i===i&&state!=='stopped'){togglePlay();return;}
   stop(false); cur={...s,i};
+  
+  intentPlay=true; clrRec(); // Track user intent
+  
   document.querySelectorAll('.sc').forEach(c=>c.classList.remove('playing'));
   const card=$(`sc${i}`);
   if(card){card.classList.add('playing');card.scrollIntoView({behavior:'smooth',block:'nearest'});}
@@ -249,16 +272,24 @@ function play(s,i){
   au.src=s.url_resolved||s.url;
   au.volume=$('vol').value/100;
   au.muted=muted;
-  au.play().catch(()=>{status('Stream failed — try another','err');setStopped();});
+  au.play().catch(()=>{ tryRec(); });
 }
 
 function togglePlay(){
   if(!cur){status('Select a station first','');return;}
-  if(au.paused)au.play().catch(()=>status('Playback failed','err'));
-  else{au.pause();status('Paused','');setPaused();}
+  if(au.paused) {
+    intentPlay=true;
+    au.play().catch(()=>tryRec());
+  } else {
+    intentPlay=false; clrRec(); // Clear user intent & timers
+    au.pause();
+    status('Paused','');
+    setPaused();
+  }
 }
 
 function stopRadio(clear=true){
+  intentPlay=false; clrRec(); // Clear user intent & timers
   au.pause();au.src='';
   if(clear){cur=null;$('np').classList.remove('on');status('Stopped','');}
   document.querySelectorAll('.sc').forEach(c=>c.classList.remove('playing'));
@@ -286,11 +317,18 @@ function setStopped(){state='stopped';$('pi').style.display='';$('pai').style.di
 
 function e(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 
-au.addEventListener('playing',()=>{status('▶ LIVE — '+(cur?.name||''),'ok');setPlaying();});
+au.addEventListener('playing',()=>{clrRec();status('▶ LIVE — '+(cur?.name||''),'ok');setPlaying();});
 au.addEventListener('waiting',()=>{status('Buffering…','');setLoading();});
 au.addEventListener('stalled',()=>status('Stream stalled…',''));
 au.addEventListener('pause',()=>{if(state!=='stopped')setPaused();});
-au.addEventListener('error',()=>{status('Stream error — try another','err');setStopped();if(cur)$(`sc${cur.i}`)?.classList.remove('playing');});
+
+au.addEventListener('error',()=>{
+  if(intentPlay) tryRec();
+  else { status('Stream error — try another','err');setStopped();if(cur)$(`sc${cur.i}`)?.classList.remove('playing'); }
+});
+
+// Live streams shouldn't usually fire ended, if they do, it's a disconnect.
+au.addEventListener('ended',()=>{ if(intentPlay) tryRec(); });
 
 // Wake lock — keep screen on while playing
 let wl=null;
@@ -298,6 +336,15 @@ async function wakeOn(){try{if('wakeLock'in navigator)wl=await navigator.wakeLoc
 async function wakeOff(){if(wl){await wl.release();wl=null;}}
 au.addEventListener('playing',wakeOn);
 au.addEventListener('pause',wakeOff);
+
+// Device connectivity detection
+window.addEventListener('offline', ()=>{
+  if(intentPlay){status('Offline. Waiting for network...','err');setLoading();}
+});
+window.addEventListener('online', ()=>{
+  if(intentPlay){clrRec(); tryRec();} // Immediate attempt when internet returns
+});
+
 </script>
 
 <!-- Inline Service Worker for offline shell caching -->
