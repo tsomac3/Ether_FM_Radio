@@ -33,12 +33,17 @@ body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;displa
 header{padding:13px 20px 10px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);flex-shrink:0;}
 .logo{font-weight:800;font-size:20px;letter-spacing:6px;color:var(--accent);}
 .logo span{color:var(--muted);font-weight:400;}
+.header-right {display:flex; gap:12px; align-items:center;}
 .dots{display:flex;gap:5px;align-items:flex-end;height:20px;}
 .dot{width:5px;border-radius:2px;background:var(--border);}
 .dot:nth-child(1){height:8px;} .dot:nth-child(2){height:13px;} .dot:nth-child(3){height:20px;} .dot:nth-child(4){height:13px;}
 body.playing .dot{background:var(--playing);animation:pb .8s ease-in-out infinite alternate;}
 body.playing .dot:nth-child(2){animation-delay:.15s;} body.playing .dot:nth-child(3){animation-delay:.3s;} body.playing .dot:nth-child(4){animation-delay:.45s;}
 @keyframes pb{from{opacity:.4;transform:scaleY(.6);}to{opacity:1;transform:scaleY(1);}}
+
+#auth-btn {display:none; background:var(--card); color:var(--text); border:1px solid var(--border); border-radius:6px; padding:6px 10px; font-family:'Space Mono',monospace; font-size:10px; font-weight:700; cursor:pointer; transition:all .2s;}
+#auth-btn:active {transform:scale(0.95);}
+#auth-btn.signed-in {color:var(--playing); border-color:var(--playing);}
 
 /* NOW PLAYING */
 #np{background:var(--surface);border-bottom:1px solid var(--border);padding:9px 20px;flex-shrink:0;display:none;}
@@ -123,7 +128,10 @@ body.playing .dot:nth-child(2){animation-delay:.15s;} body.playing .dot:nth-chil
 
 <header>
   <div class="logo">ETHER<span>·FM</span></div>
-  <div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+  <div class="header-right">
+    <button id="auth-btn" onclick="window.signInGoogle()">Sign In</button>
+    <div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+  </div>
 </header>
 
 <div id="np">
@@ -187,7 +195,7 @@ body.playing .dot:nth-child(2){animation-delay:.15s;} body.playing .dot:nth-chil
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-import { getAuth, signInWithCustomToken, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+import { getAuth, signInWithCustomToken, signInAnonymously, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 import { getFirestore, collection, doc, setDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
 const GENRES=['game','jazz','rock','pop','classical','electronic','hip hop','ambient','country','reggae','blues','soul','metal','punk','indie','lofi','news','talk','dance','techno','house'];
@@ -208,22 +216,31 @@ let app, auth, db;
 let firebaseEnabled = false;
 let userId = null;
 let unsubFavs = null;
+const provider = new GoogleAuthProvider();
+
+// IMPORTANT: This forces Google to show the account selection screen every time
+provider.setCustomParameters({ prompt: 'select_account' });
+
 const appId = typeof __app_id !== 'undefined' ? __app_id : 'ether-fm';
 
-const firebaseConfig = {
-  apiKey: "AIzaSyB0zaq7SlbQ9eJv11Tr5GkN1OMpGkC6IdI",
-  authDomain: "ether-fm-ade95.firebaseapp.com",
-  projectId: "ether-fm-ade95",
-  storageBucket: "ether-fm-ade95.firebasestorage.app",
-  messagingSenderId: "11968135645",
-  appId: "1:11968135645:web:b086b365fd423805a67634"
-};
-
-
-app = initializeApp(firebaseConfig);
-auth = getAuth(app);
-db = getFirestore(app);
-firebaseEnabled = true;
+try {
+  let firebaseConfig = null;
+  if (typeof __firebase_config !== 'undefined' && __firebase_config) {
+    firebaseConfig = JSON.parse(__firebase_config);
+  }
+  
+  // Safely initialize only if valid API key is present
+  if (firebaseConfig && firebaseConfig.apiKey) {
+    app = initializeApp(firebaseConfig);
+    auth = getAuth(app);
+    db = getFirestore(app);
+    firebaseEnabled = true;
+  } else {
+    console.warn("Firebase config is missing or invalid. Running in local mode.");
+  }
+} catch(e) {
+  console.warn("Failed to parse Firebase config. Running in local mode.", e);
+}
 
 const initAuth = async () => {
   if (!firebaseEnabled) {
@@ -241,15 +258,72 @@ const initAuth = async () => {
   } catch(e) {
     console.error('Auth error', e);
     firebaseEnabled = false;
-    status('Cloud connection failed, running in local mode', 'warn');
+    
+    let msg = 'Cloud connection failed, running in local mode';
+    
+    // Check specifically for domain authorization issues
+    if (e && e.code === 'auth/unauthorized-domain') {
+      msg = 'Domain not authorized in Firebase';
+      const domain = window.location.hostname;
+      
+      // Update the main UI so the user clearly sees what's wrong
+      const startEl = $('start');
+      startEl.innerHTML = `⚠️ <b style="color:var(--danger)">Firebase Domain Error</b><br><br>You need to add <b>${domain}</b> to your Firebase Authorized Domains.<br><br><span style="color:var(--muted);font-size:10px;">Go to Firebase Console > Authentication > Settings > Authorized domains</span>`;
+      startEl.style.display = 'block';
+    }
+    
+    status(msg, 'warn');
   }
 };
 initAuth();
 
+// GOOGLE SIGN IN LOGIC
+window.signInGoogle = async () => {
+  if (!firebaseEnabled) {
+    status("Cloud sync is not configured on this version.", "warn");
+    return;
+  }
+  try {
+    if (auth.currentUser && !auth.currentUser.isAnonymous) {
+      // User is already signed in with Google, sign them out
+      await signOut(auth);
+      // Immediately fallback to anonymous so they can still use the app
+      await signInAnonymously(auth);
+      status('Signed out. Using local session.', 'ok');
+    } else {
+      // Sign in with Google (will show popup)
+      await signInWithPopup(auth, provider);
+      status('Signed in with Google!', 'ok');
+    }
+  } catch (error) {
+    console.error("Auth error", error);
+    let msg = 'Sign in popup closed or failed.';
+    
+    if (error && error.code === 'auth/unauthorized-domain') {
+        msg = `Add ${window.location.hostname} to Firebase Auth > Settings > Authorized Domains`;
+    }
+    
+    status(msg, 'err');
+  }
+};
+
 if (firebaseEnabled) {
   onAuthStateChanged(auth, (user) => {
+    const btn = $('auth-btn');
+    btn.style.display = 'block'; // Show auth button if firebase is working
+    
     if (user) {
       userId = user.uid;
+      
+      // Update UI depending on if they are a real user or a guest
+      if (!user.isAnonymous) {
+        btn.textContent = 'Sign Out';
+        btn.classList.add('signed-in');
+      } else {
+        btn.textContent = 'Sign In';
+        btn.classList.remove('signed-in');
+      }
+      
       status('Search a genre to find stations', '');
       loadFavorites();
     } else {
@@ -334,7 +408,7 @@ async function toggleFavDB(station) {
   const uuid = getUuid(station);
   const isFav = favs.some(f => getUuid(f) === uuid);
   
-  // Local Mode Fallback (when Firebase is disabled/missing)
+  // Local Mode Fallback
   if (!firebaseEnabled || !userId) {
     if (isFav) {
       favs = favs.filter(f => getUuid(f) !== uuid);
@@ -578,6 +652,7 @@ window.onGenreSelect = onGenreSelect;
 window.onFavSelect = onFavSelect;
 window.toggleCurrentFav = toggleCurrentFav;
 window.toggleListFav = toggleListFav;
+window.signInGoogle = signInGoogle;
 </script>
 
 <!-- Inline Service Worker for offline shell caching -->
