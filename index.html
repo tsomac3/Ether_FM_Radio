@@ -1,663 +1,1491 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black">
-<meta name="apple-mobile-web-app-title" content="ETHER FM">
-<meta name="theme-color" content="#0a0a0c">
-<title>ETHER FM</title>
-<link rel="manifest" href="manifest.json">
-<link rel="apple-touch-icon" href="icon.png">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;700;800&display=swap" rel="stylesheet">
-<style>
-:root {
-  --bg:#0a0a0c; --surface:#111115; --card:#18181e; --border:#2a2a35;
-  --accent:#e8a030; --accent2:#c46020; --text:#e8e8f0; --muted:#6a6a80;
-  --playing:#40d080; --danger:#e84040; --r:14px;
-}
-*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;user-select:none;}
-html,body{height:100%;overflow:hidden;}
-body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;display:flex;flex-direction:column;height:100dvh;padding-top:env(safe-area-inset-top,0);padding-bottom:env(safe-area-inset-bottom,0);}
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, user-scalable=no"
+    />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+    <meta name="apple-mobile-web-app-title" content="ETHER FM" />
+    <meta name="theme-color" content="#0a0a0c" />
+    <title>ETHER FM</title>
+    <link rel="manifest" href="manifest.json" />
+    <link rel="apple-touch-icon" href="icon.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg: #0a0a0c;
+        --surface: #111115;
+        --card: #18181e;
+        --border: #2a2a35;
+        --accent: #e8a030;
+        --accent2: #c46020;
+        --text: #e8e8f0;
+        --muted: #6a6a80;
+        --playing: #40d080;
+        --danger: #e84040;
+        --r: 14px;
+      }
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+        -webkit-tap-highlight-color: transparent;
+        user-select: none;
+      }
+      html,
+      body {
+        height: 100%;
+        overflow: hidden;
+      }
+      body {
+        background: var(--bg);
+        color: var(--text);
+        font-family: "Syne", sans-serif;
+        display: flex;
+        flex-direction: column;
+        height: 100dvh;
+        padding-top: env(safe-area-inset-top, 0);
+        padding-bottom: env(safe-area-inset-bottom, 0);
+      }
 
-/* INSTALL BANNER */
-#ib{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#000;padding:10px 16px;display:none;align-items:center;justify-content:space-between;font-size:13px;font-weight:700;gap:10px;flex-shrink:0;}
-#ib.show{display:flex;}
-#ib-btn{background:#000;color:var(--accent);border:none;border-radius:8px;padding:6px 14px;font-family:'Space Mono',monospace;font-size:11px;font-weight:700;cursor:pointer;}
-#ib-x{background:none;border:none;color:#000;font-size:20px;cursor:pointer;line-height:1;}
+      /* INSTALL BANNER */
+      #ib {
+        background: linear-gradient(135deg, var(--accent), var(--accent2));
+        color: #000;
+        padding: 10px 16px;
+        display: none;
+        align-items: center;
+        justify-content: space-between;
+        font-size: 13px;
+        font-weight: 700;
+        gap: 10px;
+        flex-shrink: 0;
+      }
+      #ib.show {
+        display: flex;
+      }
+      #ib-btn {
+        background: #000;
+        color: var(--accent);
+        border: none;
+        border-radius: 8px;
+        padding: 6px 14px;
+        font-family: "Space Mono", monospace;
+        font-size: 11px;
+        font-weight: 700;
+        cursor: pointer;
+      }
+      #ib-x {
+        background: none;
+        border: none;
+        color: #000;
+        font-size: 20px;
+        cursor: pointer;
+        line-height: 1;
+      }
 
-/* HEADER */
-header{padding:13px 20px 10px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);flex-shrink:0;}
-.logo{font-weight:800;font-size:20px;letter-spacing:6px;color:var(--accent);}
-.logo span{color:var(--muted);font-weight:400;}
-.header-right {display:flex; gap:12px; align-items:center;}
-.dots{display:flex;gap:5px;align-items:flex-end;height:20px;}
-.dot{width:5px;border-radius:2px;background:var(--border);}
-.dot:nth-child(1){height:8px;} .dot:nth-child(2){height:13px;} .dot:nth-child(3){height:20px;} .dot:nth-child(4){height:13px;}
-body.playing .dot{background:var(--playing);animation:pb .8s ease-in-out infinite alternate;}
-body.playing .dot:nth-child(2){animation-delay:.15s;} body.playing .dot:nth-child(3){animation-delay:.3s;} body.playing .dot:nth-child(4){animation-delay:.45s;}
-@keyframes pb{from{opacity:.4;transform:scaleY(.6);}to{opacity:1;transform:scaleY(1);}}
-
-#auth-btn {display:none; background:var(--card); color:var(--text); border:1px solid var(--border); border-radius:6px; padding:6px 10px; font-family:'Space Mono',monospace; font-size:10px; font-weight:700; cursor:pointer; transition:all .2s;}
-#auth-btn:active {transform:scale(0.95);}
-#auth-btn.signed-in {color:var(--playing); border-color:var(--playing);}
-#auth-btn.disabled {opacity:0.5; cursor:not-allowed;}
-
-/* NOW PLAYING */
-#np{background:var(--surface);border-bottom:1px solid var(--border);padding:9px 20px;flex-shrink:0;display:none;}
-#np.on{display:block;}
-#np-lbl{font-size:9px;letter-spacing:3px;color:var(--muted);text-transform:uppercase;font-family:'Space Mono',monospace;}
-#np-name{font-size:15px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px;}
-#np-genre{font-size:11px;color:var(--accent);font-family:'Space Mono',monospace;margin-top:1px;}
-
-/* CONTROLS */
-#ctrl{background:var(--surface);border-bottom:1px solid var(--border);padding:12px 20px;display:flex;align-items:center;gap:12px;flex-shrink:0;}
-.cbtn{border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;border-radius:50%;transition:all .15s;flex-shrink:0;}
-#bp{width:52px;height:52px;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#000;box-shadow:0 4px 18px rgba(232,160,48,.3);}
-#bp:active{transform:scale(.93);}
-#bm{width:40px;height:40px;background:var(--card);color:var(--text);border:1px solid var(--border);}
-#bm.muted{color:var(--danger);border-color:var(--danger);} #bm:active{transform:scale(.93);}
-#bfav{width:40px;height:40px;background:var(--card);color:var(--text);border:1px solid var(--border);}
-#bfav.active{color:var(--accent);border-color:var(--accent);} #bfav:active{transform:scale(.93);}
-
-.vwrap{display:flex;align-items:center;gap:10px;flex:1;}
-#vol{-webkit-appearance:none;appearance:none;width:100%;height:4px;background:var(--border);border-radius:2px;outline:none;cursor:pointer;}
-#vol::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:var(--accent);cursor:pointer;box-shadow:0 0 0 4px rgba(232,160,48,.2);}
-
-/* STATUS */
-#sb{padding:5px 20px;font-size:11px;font-family:'Space Mono',monospace;color:var(--muted);background:var(--bg);flex-shrink:0;min-height:22px;}
-#sb.err{color:var(--danger);} #sb.ok{color:var(--playing);} #sb.warn{color:#e8a030;}
-
-/* DROPDOWNS & SEARCH */
-.dd { width:100%;background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:10px 14px;color:var(--text);font-family:'Space Mono',monospace;font-size:13px;outline:none;cursor:pointer;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236a6a80' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;transition:border-color .2s; }
-.dd:focus { border-color:var(--accent); }
-.dd option { background:var(--card); color:var(--text); }
-
-.fav-wrap { padding: 10px 16px 0; flex-shrink:0; }
-.gd-wrap { padding: 0 16px 10px; flex-shrink:0; }
-
-.sa{flex-shrink:0;padding:10px 16px 8px;}
-.sr{display:flex;gap:8px;}
-#gi{flex:1;background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:10px 14px;color:var(--text);font-family:'Syne',sans-serif;font-size:15px;outline:none;transition:border-color .2s;}
-#gi::placeholder{color:var(--muted);} #gi:focus{border-color:var(--accent);}
-#sb-btn{background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;border-radius:var(--r);padding:10px 18px;color:#000;font-family:'Syne',sans-serif;font-weight:700;font-size:14px;cursor:pointer;white-space:nowrap;}
-#sb-btn:active{opacity:.8;}
-
-/* STATIONS */
-#list{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:0 12px 16px;}
-.sl{padding:10px 4px 6px;font-size:10px;letter-spacing:3px;color:var(--muted);text-transform:uppercase;font-family:'Space Mono',monospace;}
-.sc{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px;margin-bottom:8px;cursor:pointer;transition:all .12s;display:flex;align-items:center;gap:12px;position:relative;overflow:hidden;}
-.sc::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--border);transition:background .2s;}
-.sc.playing::before{background:var(--playing);}
-.sc:active{transform:scale(.985);}
-.sc.playing{border-color:rgba(64,208,128,.3);background:#12181a;}
-.si{width:38px;height:38px;border-radius:8px;background:var(--surface);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;overflow:hidden;}
-.si img{width:100%;height:100%;object-fit:cover;}
-.sinfo{flex:1;min-width:0;}
-.sname{font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.smeta{font-size:10px;color:var(--muted);font-family:'Space Mono',monospace;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-
-.sr2{flex-shrink:0; display:flex; flex-direction:column; align-items:flex-end; justify-content:center; gap:4px; min-width:40px;}
-.sfav{background:none;border:none;color:var(--muted);cursor:pointer;padding:2px;transition:color .2s;display:flex;align-items:center;}
-.sfav.active{color:var(--accent);} .sfav:active{transform:scale(.85);}
-.sbr{font-size:10px;font-family:'Space Mono',monospace;color:var(--muted);}
-.slive{font-size:10px;font-family:'Space Mono',monospace;color:var(--playing);display:none;}
-.sc.playing .slive{display:block;} .sc.playing .sbr{display:none;}
-
-/* LOADER / EMPTY */
-#ldr{display:none;text-align:center;padding:30px 20px;color:var(--muted);font-family:'Space Mono',monospace;font-size:12px;}
-#ldr.on{display:block;}
-.spin{display:inline-block;width:28px;height:28px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite;margin-bottom:10px;}
-@keyframes spin{to{transform:rotate(360deg);}}
-#empty{display:none;text-align:center;padding:40px 20px;color:var(--muted);font-family:'Space Mono',monospace;font-size:12px;line-height:1.9;}
-#empty.on{display:block;}
-#start{text-align:center;padding:30px 20px;color:var(--muted);font-family:'Space Mono',monospace;font-size:11px;line-height:2;}
-</style>
-</head>
-<body>
-
-<div id="ib">
-  <span>📲 Install as app — no browser needed</span>
-  <div style="display:flex;gap:8px;align-items:center">
-    <button id="ib-btn">Install</button>
-    <button id="ib-x">✕</button>
-  </div>
-</div>
-
-<header>
-  <div class="logo">ETHER<span>·FM</span></div>
-  <div class="header-right">
-    <button id="auth-btn" onclick="window.signInGoogle()">Sign In</button>
-    <div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
-  </div>
-</header>
-
-<div id="np">
-  <div id="np-lbl">Now Playing</div>
-  <div id="np-name">—</div>
-  <div id="np-genre">—</div>
-</div>
-
-<div id="ctrl">
-  <button class="cbtn" id="bp" onclick="window.togglePlay()">
-    <svg id="pi" width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21"/></svg>
-    <svg id="pai" width="22" height="22" viewBox="0 0 24 24" fill="currentColor" style="display:none"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg>
-    <svg id="li" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="display:none">
-      <circle cx="12" cy="12" r="9" stroke-dasharray="28 28" stroke-linecap="round">
-        <animateTransform attributeName="transform" type="rotate" from="0 12 12" to="360 12 12" dur=".85s" repeatCount="indefinite"/>
-      </circle>
-    </svg>
-  </button>
-  
-  <div class="vwrap">
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2"><polygon points="11,5 6,9 2,9 2,15 6,15 11,19"/></svg>
-    <input type="range" id="vol" min="0" max="100" value="80" oninput="window.setVol(this.value)">
-  </div>
-  
-  <button class="cbtn" id="bm" onclick="window.toggleMute()">
-    <svg id="mi1" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11,5 6,9 2,9 2,15 6,15 11,19"/><path d="M15.5 8.5a5 5 0 0 1 0 7M19 5a10 10 0 0 1 0 14"/></svg>
-    <svg id="mi2" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none"><polygon points="11,5 6,9 2,9 2,15 6,15 11,19"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>
-  </button>
-  
-  <button class="cbtn" id="bfav" onclick="window.toggleCurrentFav()">
-    <svg id="star-empty" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-    <svg id="star-filled" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" style="display:none"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-  </button>
-</div>
-
-<div id="sb">Checking session...</div>
-
-<div class="fav-wrap">
-  <select id="fav-dd" class="dd" onchange="window.onFavSelect(this.value)">
-    <option value="">★ Favorites (0)</option>
-  </select>
-</div>
-
-<div class="sa">
-  <div class="sr">
-    <input id="gi" type="text" placeholder="jazz, rock, classical, lofi…" autocomplete="off" autocorrect="off" spellcheck="false" onkeydown="if(event.key==='Enter'){this.blur();window.search();}">
-    <button id="sb-btn" onclick="window.search()">Search</button>
-  </div>
-</div>
-
-<div class="gd-wrap"><select id="gd" class="dd" onchange="window.onGenreSelect(this.value)"><option value="">— Select a genre —</option></select></div>
-
-<div id="list">
-  <div id="start">🎙 Pick a genre above<br>to find live stations worldwide</div>
-  <div id="ldr"><div class="spin"></div><br>Scanning frequencies…</div>
-  <div id="empty">No stations found<br>Try a different genre</div>
-  <div id="sw"></div>
-</div>
-
-<audio id="au" preload="none"></audio>
-
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-import { getAuth, signInWithCustomToken, signInAnonymously, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-import { getFirestore, collection, doc, setDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-require("dotenv").config();
-const GENRES=['game','jazz','rock','pop','classical','electronic','hip hop','ambient','country','reggae','blues','soul','metal','punk','indie','lofi','news','talk','dance','techno','house'];
-const APIS=['https://de1.api.radio-browser.info','https://at1.api.radio-browser.info','https://nl1.api.radio-browser.info'];
-
-let host=APIS[0], cur=null, muted=false, state='stopped';
-let currentList=[]; 
-let favs=[]; 
-
-// RECONNECT VARIABLES
-let rtmr=null, rcnt=0, intentPlay=false;
-
-const au=document.getElementById('au');
-const $ = id => document.getElementById(id);
-
-// --- FIREBASE INIT ---
-// IMPORTANT: To make this work on GitHub, replace this try/catch block 
-// with your actual Firebase config object that you get from the Firebase Console!
-let app, auth, db;
-let firebaseEnabled = false;
-let userId = null;
-let unsubFavs = null;
-const provider = new GoogleAuthProvider();
-
-provider.setCustomParameters({ prompt: 'select_account' });
-const appId = typeof __app_id !== 'undefined' ? __app_id : 'ether-fm';
-
-// Your web app's Firebase configuration
-
-const firebaseConfig = {
-  apiKey: process.env.API_KEY,
-  authDomain: process.env.AUTH_DOMAIN,
-  projectId: process.env.PROJECT_ID,
-  storageBucket: process.env.STORAGE_BUCKET,
-  messagingSenderId: process.env.MESSAGING_SENDER_ID,
-  appId: process.env.APP_ID
-};
-
-// Initialize Firebase
-app = initializeApp(firebaseConfig);
-auth = getAuth(app);
-db = getFirestore(app);
-firebaseEnabled = true;
-
-const authBtn = $('auth-btn');
-
-if (firebaseEnabled) {
-  let initialCheck = true; // Flag to gracefully check for saved sessions
-  
-  onAuthStateChanged(auth, async (user) => {
-    
-    // 1. Check for missing session on initial load
-    if (initialCheck) {
-      initialCheck = false;
-      
-      // If we're in the preview environment, prioritize the custom token
-      if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-        await signInWithCustomToken(auth, __initial_auth_token);
-        return; // Listener fires again once token resolves
-      } 
-      // If no user is saved in memory, fallback to a brand new Guest account
-      else if (!user) {
-        try {
-          await signInAnonymously(auth);
-        } catch(e) {
-          console.error('Guest auth failed', e);
-          status('Cloud connection failed', 'warn');
-          authBtn.textContent = 'Auth Error';
-          authBtn.classList.add('disabled');
+      /* HEADER */
+      header {
+        padding: 13px 20px 10px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        border-bottom: 1px solid var(--border);
+        flex-shrink: 0;
+      }
+      .logo {
+        font-weight: 800;
+        font-size: 20px;
+        letter-spacing: 6px;
+        color: var(--accent);
+      }
+      .logo span {
+        color: var(--muted);
+        font-weight: 400;
+      }
+      .header-right {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+      }
+      .dots {
+        display: flex;
+        gap: 5px;
+        align-items: flex-end;
+        height: 20px;
+      }
+      .dot {
+        width: 5px;
+        border-radius: 2px;
+        background: var(--border);
+      }
+      .dot:nth-child(1) {
+        height: 8px;
+      }
+      .dot:nth-child(2) {
+        height: 13px;
+      }
+      .dot:nth-child(3) {
+        height: 20px;
+      }
+      .dot:nth-child(4) {
+        height: 13px;
+      }
+      body.playing .dot {
+        background: var(--playing);
+        animation: pb 0.8s ease-in-out infinite alternate;
+      }
+      body.playing .dot:nth-child(2) {
+        animation-delay: 0.15s;
+      }
+      body.playing .dot:nth-child(3) {
+        animation-delay: 0.3s;
+      }
+      body.playing .dot:nth-child(4) {
+        animation-delay: 0.45s;
+      }
+      @keyframes pb {
+        from {
+          opacity: 0.4;
+          transform: scaleY(0.6);
         }
-        return; // Listener fires again once guest logs in
+        to {
+          opacity: 1;
+          transform: scaleY(1);
+        }
       }
-    }
-    
-    // 2. Normal auth state handling (runs immediately if user was remembered!)
-    authBtn.style.display = 'block';
-    
-    if (user) {
-      userId = user.uid;
-      
-      if (!user.isAnonymous) {
-        authBtn.textContent = 'Sign Out';
-        authBtn.classList.add('signed-in');
-        authBtn.classList.remove('disabled');
+
+      #auth-btn {
+        display: none;
+        background: var(--card);
+        color: var(--text);
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        padding: 6px 10px;
+        font-family: "Space Mono", monospace;
+        font-size: 10px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+      #auth-btn:active {
+        transform: scale(0.95);
+      }
+      #auth-btn.signed-in {
+        color: var(--playing);
+        border-color: var(--playing);
+      }
+      #auth-btn.disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+
+      /* NOW PLAYING */
+      #np {
+        background: var(--surface);
+        border-bottom: 1px solid var(--border);
+        padding: 9px 20px;
+        flex-shrink: 0;
+        display: none;
+      }
+      #np.on {
+        display: block;
+      }
+      #np-lbl {
+        font-size: 9px;
+        letter-spacing: 3px;
+        color: var(--muted);
+        text-transform: uppercase;
+        font-family: "Space Mono", monospace;
+      }
+      #np-name {
+        font-size: 15px;
+        font-weight: 700;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        margin-top: 1px;
+      }
+      #np-genre {
+        font-size: 11px;
+        color: var(--accent);
+        font-family: "Space Mono", monospace;
+        margin-top: 1px;
+      }
+
+      /* CONTROLS */
+      #ctrl {
+        background: var(--surface);
+        border-bottom: 1px solid var(--border);
+        padding: 12px 20px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        flex-shrink: 0;
+      }
+      .cbtn {
+        border: none;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        transition: all 0.15s;
+        flex-shrink: 0;
+      }
+      #bp {
+        width: 52px;
+        height: 52px;
+        background: linear-gradient(135deg, var(--accent), var(--accent2));
+        color: #000;
+        box-shadow: 0 4px 18px rgba(232, 160, 48, 0.3);
+      }
+      #bp:active {
+        transform: scale(0.93);
+      }
+      #bm {
+        width: 40px;
+        height: 40px;
+        background: var(--card);
+        color: var(--text);
+        border: 1px solid var(--border);
+      }
+      #bm.muted {
+        color: var(--danger);
+        border-color: var(--danger);
+      }
+      #bm:active {
+        transform: scale(0.93);
+      }
+      #bfav {
+        width: 40px;
+        height: 40px;
+        background: var(--card);
+        color: var(--text);
+        border: 1px solid var(--border);
+      }
+      #bfav.active {
+        color: var(--accent);
+        border-color: var(--accent);
+      }
+      #bfav:active {
+        transform: scale(0.93);
+      }
+
+      .vwrap {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex: 1;
+      }
+      #vol {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 100%;
+        height: 4px;
+        background: var(--border);
+        border-radius: 2px;
+        outline: none;
+        cursor: pointer;
+      }
+      #vol::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        background: var(--accent);
+        cursor: pointer;
+        box-shadow: 0 0 0 4px rgba(232, 160, 48, 0.2);
+      }
+
+      /* STATUS */
+      #sb {
+        padding: 5px 20px;
+        font-size: 11px;
+        font-family: "Space Mono", monospace;
+        color: var(--muted);
+        background: var(--bg);
+        flex-shrink: 0;
+        min-height: 22px;
+      }
+      #sb.err {
+        color: var(--danger);
+      }
+      #sb.ok {
+        color: var(--playing);
+      }
+      #sb.warn {
+        color: #e8a030;
+      }
+
+      /* DROPDOWNS & SEARCH */
+      .dd {
+        width: 100%;
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: var(--r);
+        padding: 10px 14px;
+        color: var(--text);
+        font-family: "Space Mono", monospace;
+        font-size: 13px;
+        outline: none;
+        cursor: pointer;
+        appearance: none;
+        -webkit-appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236a6a80' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 14px center;
+        transition: border-color 0.2s;
+      }
+      .dd:focus {
+        border-color: var(--accent);
+      }
+      .dd option {
+        background: var(--card);
+        color: var(--text);
+      }
+
+      .fav-wrap {
+        padding: 10px 16px 0;
+        flex-shrink: 0;
+      }
+      .gd-wrap {
+        padding: 0 16px 10px;
+        flex-shrink: 0;
+      }
+
+      .sa {
+        flex-shrink: 0;
+        padding: 10px 16px 8px;
+      }
+      .sr {
+        display: flex;
+        gap: 8px;
+      }
+      #gi {
+        flex: 1;
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: var(--r);
+        padding: 10px 14px;
+        color: var(--text);
+        font-family: "Syne", sans-serif;
+        font-size: 15px;
+        outline: none;
+        transition: border-color 0.2s;
+      }
+      #gi::placeholder {
+        color: var(--muted);
+      }
+      #gi:focus {
+        border-color: var(--accent);
+      }
+      #sb-btn {
+        background: linear-gradient(135deg, var(--accent), var(--accent2));
+        border: none;
+        border-radius: var(--r);
+        padding: 10px 18px;
+        color: #000;
+        font-family: "Syne", sans-serif;
+        font-weight: 700;
+        font-size: 14px;
+        cursor: pointer;
+        white-space: nowrap;
+      }
+      #sb-btn:active {
+        opacity: 0.8;
+      }
+
+      /* STATIONS */
+      #list {
+        flex: 1;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+        padding: 0 12px 16px;
+      }
+      .sl {
+        padding: 10px 4px 6px;
+        font-size: 10px;
+        letter-spacing: 3px;
+        color: var(--muted);
+        text-transform: uppercase;
+        font-family: "Space Mono", monospace;
+      }
+      .sc {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: var(--r);
+        padding: 12px 14px;
+        margin-bottom: 8px;
+        cursor: pointer;
+        transition: all 0.12s;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        position: relative;
+        overflow: hidden;
+      }
+      .sc::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 3px;
+        background: var(--border);
+        transition: background 0.2s;
+      }
+      .sc.playing::before {
+        background: var(--playing);
+      }
+      .sc:active {
+        transform: scale(0.985);
+      }
+      .sc.playing {
+        border-color: rgba(64, 208, 128, 0.3);
+        background: #12181a;
+      }
+      .si {
+        width: 38px;
+        height: 38px;
+        border-radius: 8px;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 16px;
+        flex-shrink: 0;
+        overflow: hidden;
+      }
+      .si img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+      .sinfo {
+        flex: 1;
+        min-width: 0;
+      }
+      .sname {
+        font-size: 13px;
+        font-weight: 700;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .smeta {
+        font-size: 10px;
+        color: var(--muted);
+        font-family: "Space Mono", monospace;
+        margin-top: 2px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .sr2 {
+        flex-shrink: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        justify-content: center;
+        gap: 4px;
+        min-width: 40px;
+      }
+      .sfav {
+        background: none;
+        border: none;
+        color: var(--muted);
+        cursor: pointer;
+        padding: 2px;
+        transition: color 0.2s;
+        display: flex;
+        align-items: center;
+      }
+      .sfav.active {
+        color: var(--accent);
+      }
+      .sfav:active {
+        transform: scale(0.85);
+      }
+      .sbr {
+        font-size: 10px;
+        font-family: "Space Mono", monospace;
+        color: var(--muted);
+      }
+      .slive {
+        font-size: 10px;
+        font-family: "Space Mono", monospace;
+        color: var(--playing);
+        display: none;
+      }
+      .sc.playing .slive {
+        display: block;
+      }
+      .sc.playing .sbr {
+        display: none;
+      }
+
+      /* LOADER / EMPTY */
+      #ldr {
+        display: none;
+        text-align: center;
+        padding: 30px 20px;
+        color: var(--muted);
+        font-family: "Space Mono", monospace;
+        font-size: 12px;
+      }
+      #ldr.on {
+        display: block;
+      }
+      .spin {
+        display: inline-block;
+        width: 28px;
+        height: 28px;
+        border: 2px solid var(--border);
+        border-top-color: var(--accent);
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+        margin-bottom: 10px;
+      }
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+      #empty {
+        display: none;
+        text-align: center;
+        padding: 40px 20px;
+        color: var(--muted);
+        font-family: "Space Mono", monospace;
+        font-size: 12px;
+        line-height: 1.9;
+      }
+      #empty.on {
+        display: block;
+      }
+      #start {
+        text-align: center;
+        padding: 30px 20px;
+        color: var(--muted);
+        font-family: "Space Mono", monospace;
+        font-size: 11px;
+        line-height: 2;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="ib">
+      <span>📲 Install as app — no browser needed</span>
+      <div style="display: flex; gap: 8px; align-items: center">
+        <button id="ib-btn">Install</button>
+        <button id="ib-x">✕</button>
+      </div>
+    </div>
+
+    <header>
+      <div class="logo">ETHER<span>·FM</span></div>
+      <div class="header-right">
+        <button id="auth-btn" onclick="window.signInGoogle()">Sign In</button>
+        <div class="dots">
+          <div class="dot"></div>
+          <div class="dot"></div>
+          <div class="dot"></div>
+          <div class="dot"></div>
+        </div>
+      </div>
+    </header>
+
+    <div id="np">
+      <div id="np-lbl">Now Playing</div>
+      <div id="np-name">—</div>
+      <div id="np-genre">—</div>
+    </div>
+
+    <div id="ctrl">
+      <button class="cbtn" id="bp" onclick="window.togglePlay()">
+        <svg
+          id="pi"
+          width="22"
+          height="22"
+          viewBox="0 0 24 24"
+          fill="currentColor"
+        >
+          <polygon points="5,3 19,12 5,21" />
+        </svg>
+        <svg
+          id="pai"
+          width="22"
+          height="22"
+          viewBox="0 0 24 24"
+          fill="currentColor"
+          style="display: none"
+        >
+          <rect x="6" y="4" width="4" height="16" rx="1" />
+          <rect x="14" y="4" width="4" height="16" rx="1" />
+        </svg>
+        <svg
+          id="li"
+          width="22"
+          height="22"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2.5"
+          style="display: none"
+        >
+          <circle
+            cx="12"
+            cy="12"
+            r="9"
+            stroke-dasharray="28 28"
+            stroke-linecap="round"
+          >
+            <animateTransform
+              attributeName="transform"
+              type="rotate"
+              from="0 12 12"
+              to="360 12 12"
+              dur=".85s"
+              repeatCount="indefinite"
+            />
+          </circle>
+        </svg>
+      </button>
+
+      <div class="vwrap">
+        <svg
+          width="14"
+          height="14"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="var(--muted)"
+          stroke-width="2"
+        >
+          <polygon points="11,5 6,9 2,9 2,15 6,15 11,19" />
+        </svg>
+        <input
+          type="range"
+          id="vol"
+          min="0"
+          max="100"
+          value="80"
+          oninput="window.setVol(this.value)"
+        />
+      </div>
+
+      <button class="cbtn" id="bm" onclick="window.toggleMute()">
+        <svg
+          id="mi1"
+          width="18"
+          height="18"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <polygon points="11,5 6,9 2,9 2,15 6,15 11,19" />
+          <path d="M15.5 8.5a5 5 0 0 1 0 7M19 5a10 10 0 0 1 0 14" />
+        </svg>
+        <svg
+          id="mi2"
+          width="18"
+          height="18"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          style="display: none"
+        >
+          <polygon points="11,5 6,9 2,9 2,15 6,15 11,19" />
+          <line x1="23" y1="9" x2="17" y2="15" />
+          <line x1="17" y1="9" x2="23" y2="15" />
+        </svg>
+      </button>
+
+      <button class="cbtn" id="bfav" onclick="window.toggleCurrentFav()">
+        <svg
+          id="star-empty"
+          width="18"
+          height="18"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <polygon
+            points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"
+          />
+        </svg>
+        <svg
+          id="star-filled"
+          width="18"
+          height="18"
+          viewBox="0 0 24 24"
+          fill="currentColor"
+          style="display: none"
+        >
+          <polygon
+            points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"
+          />
+        </svg>
+      </button>
+    </div>
+
+    <div id="sb">Checking session...</div>
+
+    <div class="fav-wrap">
+      <select id="fav-dd" class="dd" onchange="window.onFavSelect(this.value)">
+        <option value="">★ Favorites (0)</option>
+      </select>
+    </div>
+
+    <div class="sa">
+      <div class="sr">
+        <input
+          id="gi"
+          type="text"
+          placeholder="jazz, rock, classical, lofi…"
+          autocomplete="off"
+          autocorrect="off"
+          spellcheck="false"
+          onkeydown="
+            if (event.key === 'Enter') {
+              this.blur();
+              window.search();
+            }
+          "
+        />
+        <button id="sb-btn" onclick="window.search()">Search</button>
+      </div>
+    </div>
+
+    <div class="gd-wrap">
+      <select id="gd" class="dd" onchange="window.onGenreSelect(this.value)">
+        <option value="">— Select a genre —</option>
+      </select>
+    </div>
+
+    <div id="list">
+      <div id="start">
+        🎙 Pick a genre above<br />to find live stations worldwide
+      </div>
+      <div id="ldr">
+        <div class="spin"></div>
+        <br />Scanning frequencies…
+      </div>
+      <div id="empty">No stations found<br />Try a different genre</div>
+      <div id="sw"></div>
+    </div>
+
+    <audio id="au" preload="none"></audio>
+
+    <script type="module">
+      require("dotenv").config();
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+      import {
+        getAuth,
+        signInWithCustomToken,
+        signInAnonymously,
+        onAuthStateChanged,
+        GoogleAuthProvider,
+        signInWithPopup,
+        signOut,
+      } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+      import {
+        getFirestore,
+        collection,
+        doc,
+        setDoc,
+        deleteDoc,
+        onSnapshot,
+      } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+      const GENRES = [
+        "game",
+        "jazz",
+        "rock",
+        "pop",
+        "classical",
+        "electronic",
+        "hip hop",
+        "ambient",
+        "country",
+        "reggae",
+        "blues",
+        "soul",
+        "metal",
+        "punk",
+        "indie",
+        "lofi",
+        "news",
+        "talk",
+        "dance",
+        "techno",
+        "house",
+      ];
+      const APIS = [
+        "https://de1.api.radio-browser.info",
+        "https://at1.api.radio-browser.info",
+        "https://nl1.api.radio-browser.info",
+      ];
+
+      let host = APIS[0],
+        cur = null,
+        muted = false,
+        state = "stopped";
+      let currentList = [];
+      let favs = [];
+
+      // RECONNECT VARIABLES
+      let rtmr = null,
+        rcnt = 0,
+        intentPlay = false;
+
+      const au = document.getElementById("au");
+      const $ = (id) => document.getElementById(id);
+
+      // --- FIREBASE INIT ---
+      // IMPORTANT: To make this work on GitHub, replace this try/catch block
+      // with your actual Firebase config object that you get from the Firebase Console!
+      let app, auth, db;
+      let firebaseEnabled = false;
+      let userId = null;
+      let unsubFavs = null;
+      const provider = new GoogleAuthProvider();
+
+      provider.setCustomParameters({ prompt: "select_account" });
+      const appId = typeof __app_id !== "undefined" ? __app_id : "ether-fm";
+
+      // Your web app's Firebase configuration
+
+      const firebaseConfig = {
+        apiKey: process.env.API_KEY,
+        authDomain: process.env.AUTH_DOMAIN,
+        projectId: process.env.PROJECT_ID,
+        storageBucket: process.env.STORAGE_BUCKET,
+        messagingSenderId: process.env.MESSAGING_SENDER_ID,
+        appId: process.env.APP_ID
+      };
+
+      // Initialize Firebase
+      app = initializeApp(firebaseConfig);
+      auth = getAuth(app);
+      db = getFirestore(app);
+      firebaseEnabled = true;
+
+      const authBtn = $("auth-btn");
+
+      if (firebaseEnabled) {
+        let initialCheck = true; // Flag to gracefully check for saved sessions
+
+        onAuthStateChanged(auth, async (user) => {
+          // 1. Check for missing session on initial load
+          if (initialCheck) {
+            initialCheck = false;
+
+            // If we're in the preview environment, prioritize the custom token
+            if (
+              typeof __initial_auth_token !== "undefined" &&
+              __initial_auth_token
+            ) {
+              await signInWithCustomToken(auth, __initial_auth_token);
+              return; // Listener fires again once token resolves
+            }
+            // If no user is saved in memory, fallback to a brand new Guest account
+            else if (!user) {
+              try {
+                await signInAnonymously(auth);
+              } catch (e) {
+                console.error("Guest auth failed", e);
+                status("Cloud connection failed", "warn");
+                authBtn.textContent = "Auth Error";
+                authBtn.classList.add("disabled");
+              }
+              return; // Listener fires again once guest logs in
+            }
+          }
+
+          // 2. Normal auth state handling (runs immediately if user was remembered!)
+          authBtn.style.display = "block";
+
+          if (user) {
+            userId = user.uid;
+
+            if (!user.isAnonymous) {
+              authBtn.textContent = "Sign Out";
+              authBtn.classList.add("signed-in");
+              authBtn.classList.remove("disabled");
+            } else {
+              authBtn.textContent = "Sign In";
+              authBtn.classList.remove("signed-in");
+              authBtn.classList.remove("disabled");
+            }
+
+            status("Search a genre to find stations", "");
+            loadFavorites();
+          } else {
+            userId = null;
+            if (unsubFavs) unsubFavs();
+            favs = [];
+            updateFavDD();
+          }
+        });
       } else {
-        authBtn.textContent = 'Sign In';
-        authBtn.classList.remove('signed-in');
-        authBtn.classList.remove('disabled');
+        // Graceful failure if no API keys exist
+        status("Cloud sync disabled (Config missing)", "warn");
+        authBtn.textContent = "Setup Cloud";
+        authBtn.classList.add("disabled");
+        authBtn.style.display = "block";
       }
-      
-      status('Search a genre to find stations', '');
-      loadFavorites();
-    } else {
-      userId = null;
-      if(unsubFavs) unsubFavs();
-      favs = [];
-      updateFavDD();
-    }
-  });
-  
-} else {
-  // Graceful failure if no API keys exist
-  status('Cloud sync disabled (Config missing)', 'warn');
-  authBtn.textContent = 'Setup Cloud';
-  authBtn.classList.add('disabled');
-  authBtn.style.display = 'block';
-}
 
-// GOOGLE SIGN IN LOGIC
-window.signInGoogle = async () => {
-  if (!firebaseEnabled) {
-    status("You must add your Firebase Config to code first!", "err");
-    return;
-  }
-  try {
-    if (auth.currentUser && !auth.currentUser.isAnonymous) {
-      // User is already signed in with Google, sign them out
-      await signOut(auth);
-      await signInAnonymously(auth);
-      status('Signed out. Using local session.', 'ok');
-    } else {
-      // Sign in with Google (will show popup)
-      await signInWithPopup(auth, provider);
-      status('Signed in with Google!', 'ok');
-    }
-  } catch (error) {
-    console.error("Auth error", error);
-    if (error && error.code === 'auth/unauthorized-domain') {
-      const domain = window.location.hostname;
-      $('start').innerHTML = `⚠️ <b style="color:var(--danger)">Firebase Domain Error</b><br><br>You must add <b>${domain}</b> to Firebase to enable login.<br><br><span style="color:var(--muted);font-size:10px;">Firebase Console > Authentication > Settings > Authorized domains</span>`;
-      status(`Domain ${domain} not authorized`, 'err');
-    } else {
-      status('Sign in popup closed or failed.', 'err');
-    }
-  }
-};
+      // GOOGLE SIGN IN LOGIC
+      window.signInGoogle = async () => {
+        if (!firebaseEnabled) {
+          status("You must add your Firebase Config to code first!", "err");
+          return;
+        }
+        try {
+          if (auth.currentUser && !auth.currentUser.isAnonymous) {
+            // User is already signed in with Google, sign them out
+            await signOut(auth);
+            await signInAnonymously(auth);
+            status("Signed out. Using local session.", "ok");
+          } else {
+            // Sign in with Google (will show popup)
+            await signInWithPopup(auth, provider);
+            status("Signed in with Google!", "ok");
+          }
+        } catch (error) {
+          console.error("Auth error", error);
+          if (error && error.code === "auth/unauthorized-domain") {
+            const domain = window.location.hostname;
+            $("start").innerHTML =
+              `⚠️ <b style="color:var(--danger)">Firebase Domain Error</b><br><br>You must add <b>${domain}</b> to Firebase to enable login.<br><br><span style="color:var(--muted);font-size:10px;">Firebase Console > Authentication > Settings > Authorized domains</span>`;
+            status(`Domain ${domain} not authorized`, "err");
+          } else {
+            status("Sign in popup closed or failed.", "err");
+          }
+        }
+      };
 
-// Populate dropdown
-GENRES.forEach(g=>{
-  const o=document.createElement('option');
-  o.value=g; o.textContent=g.charAt(0).toUpperCase()+g.slice(1);
-  $('gd').appendChild(o);
-});
+      // Populate dropdown
+      GENRES.forEach((g) => {
+        const o = document.createElement("option");
+        o.value = g;
+        o.textContent = g.charAt(0).toUpperCase() + g.slice(1);
+        $("gd").appendChild(o);
+      });
 
-function onGenreSelect(g){if(!g)return;$('gi').value=g;search();}
+      function onGenreSelect(g) {
+        if (!g) return;
+        $("gi").value = g;
+        search();
+      }
 
-// Get a safe ID for a station
-function getUuid(s) { return s.stationuuid || encodeURIComponent(s.url); }
+      // Get a safe ID for a station
+      function getUuid(s) {
+        return s.stationuuid || encodeURIComponent(s.url);
+      }
 
-// FAVORITES LOGIC
-function loadFavorites() {
-  if (!firebaseEnabled || !userId) return;
-  if (unsubFavs) unsubFavs();
-  const favRef = collection(db, 'artifacts', appId, 'users', userId, 'favorites');
-  
-  unsubFavs = onSnapshot(favRef, (snap) => {
-    favs = [];
-    snap.forEach(document => favs.push(document.data()));
-    updateFavDD();
-    
-    if (cur) updateFavBtn(getUuid(cur));
-    
-    // Refresh stars on the current view list
-    currentList.forEach((s) => {
-      const uuid = getUuid(s);
-      updateListFavBtn(uuid, favs.some(f => getUuid(f) === uuid));
-    });
-  }, (err) => {
-    console.error("Failed to sync favorites", err);
-  });
-}
+      // FAVORITES LOGIC
+      function loadFavorites() {
+        if (!firebaseEnabled || !userId) return;
+        if (unsubFavs) unsubFavs();
+        const favRef = collection(
+          db,
+          "artifacts",
+          appId,
+          "users",
+          userId,
+          "favorites",
+        );
 
-function updateFavDD() {
-  const dd = $('fav-dd');
-  dd.innerHTML = `<option value="">★ Favorites (${favs.length})</option>`;
-  favs.forEach(f => {
-    const o = document.createElement('option');
-    o.value = getUuid(f);
-    o.textContent = f.name || 'Unknown';
-    dd.appendChild(o);
-  });
-}
+        unsubFavs = onSnapshot(
+          favRef,
+          (snap) => {
+            favs = [];
+            snap.forEach((document) => favs.push(document.data()));
+            updateFavDD();
 
-function onFavSelect(uuid) {
-  if(!uuid) return;
-  const s = favs.find(f => getUuid(f) === uuid);
-  if(s) play(s, -1);
-  setTimeout(() => { $('fav-dd').value = ''; }, 100); 
-}
+            if (cur) updateFavBtn(getUuid(cur));
 
-function updateFavBtn(uuid) {
-  if(!cur || getUuid(cur) !== uuid) return;
-  const isFav = favs.some(f => getUuid(f) === uuid);
-  $('star-empty').style.display = isFav ? 'none' : '';
-  $('star-filled').style.display = isFav ? '' : 'none';
-  $('bfav').classList.toggle('active', isFav);
-}
+            // Refresh stars on the current view list
+            currentList.forEach((s) => {
+              const uuid = getUuid(s);
+              updateListFavBtn(
+                uuid,
+                favs.some((f) => getUuid(f) === uuid),
+              );
+            });
+          },
+          (err) => {
+            console.error("Failed to sync favorites", err);
+          },
+        );
+      }
 
-function updateListFavBtn(uuid, isFav) {
-  const btn = document.getElementById(`fav-btn-${uuid}`);
-  if (btn) {
-    btn.classList.toggle('active', isFav);
-    btn.querySelector('svg').setAttribute('fill', isFav ? 'currentColor' : 'none');
-  }
-}
+      function updateFavDD() {
+        const dd = $("fav-dd");
+        dd.innerHTML = `<option value="">★ Favorites (${favs.length})</option>`;
+        favs.forEach((f) => {
+          const o = document.createElement("option");
+          o.value = getUuid(f);
+          o.textContent = f.name || "Unknown";
+          dd.appendChild(o);
+        });
+      }
 
-async function toggleFavDB(station) {
-  const uuid = getUuid(station);
-  const isFav = favs.some(f => getUuid(f) === uuid);
-  
-  // Local Mode Fallback
-  if (!firebaseEnabled || !userId) {
-    if (isFav) {
-      favs = favs.filter(f => getUuid(f) !== uuid);
-      status('Removed from favorites (Session only)', '');
-    } else {
-      favs.push(station);
-      status('Saved to favorites (Session only)', 'ok');
-    }
-    updateFavDD();
-    if (cur) updateFavBtn(getUuid(cur));
-    updateListFavBtn(uuid, !isFav);
-    return;
-  }
-  
-  // Cloud Sync Mode
-  const safeId = encodeURIComponent(uuid).replace(/\./g, '%2E'); // Make safe for Firestore path
-  const docRef = doc(db, 'artifacts', appId, 'users', userId, 'favorites', safeId);
-  
-  try {
-    if (isFav) {
-      await deleteDoc(docRef);
-      status('Removed from cloud favorites', '');
-    } else {
-      await setDoc(docRef, station);
-      status('Saved to cloud favorites', 'ok');
-    }
-  } catch (e) {
-    console.error("Error saving favorite", e);
-    status('Error saving favorite', 'err');
-  }
-}
+      function onFavSelect(uuid) {
+        if (!uuid) return;
+        const s = favs.find((f) => getUuid(f) === uuid);
+        if (s) play(s, -1);
+        setTimeout(() => {
+          $("fav-dd").value = "";
+        }, 100);
+      }
 
-async function toggleCurrentFav() {
-  if(!cur) { status('Select a station first', ''); return; }
-  await toggleFavDB(cur);
-}
+      function updateFavBtn(uuid) {
+        if (!cur || getUuid(cur) !== uuid) return;
+        const isFav = favs.some((f) => getUuid(f) === uuid);
+        $("star-empty").style.display = isFav ? "none" : "";
+        $("star-filled").style.display = isFav ? "" : "none";
+        $("bfav").classList.toggle("active", isFav);
+      }
 
-async function toggleListFav(e, i) {
-  e.stopPropagation();
-  const s = currentList[i];
-  await toggleFavDB(s);
-}
+      function updateListFavBtn(uuid, isFav) {
+        const btn = document.getElementById(`fav-btn-${uuid}`);
+        if (btn) {
+          btn.classList.toggle("active", isFav);
+          btn
+            .querySelector("svg")
+            .setAttribute("fill", isFav ? "currentColor" : "none");
+        }
+      }
 
-// PWA install
-let dp=null;
-window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();dp=e;$('ib').classList.add('show');});
-$('ib-btn').onclick=async()=>{if(!dp)return;dp.prompt();await dp.userChoice;dp=null;$('ib').classList.remove('show');};
-$('ib-x').onclick=()=>$('ib').classList.remove('show');
-window.addEventListener('appinstalled',()=>$('ib').classList.remove('show'));
+      async function toggleFavDB(station) {
+        const uuid = getUuid(station);
+        const isFav = favs.some((f) => getUuid(f) === uuid);
 
-async function pickHost(){
-  for(const h of APIS){
-    try{const r=await fetch(`${h}/json/stats`,{signal:AbortSignal.timeout(3000)});if(r.ok){host=h;return;}}catch{}
-  }
-}
+        // Local Mode Fallback
+        if (!firebaseEnabled || !userId) {
+          if (isFav) {
+            favs = favs.filter((f) => getUuid(f) !== uuid);
+            status("Removed from favorites (Session only)", "");
+          } else {
+            favs.push(station);
+            status("Saved to favorites (Session only)", "ok");
+          }
+          updateFavDD();
+          if (cur) updateFavBtn(getUuid(cur));
+          updateListFavBtn(uuid, !isFav);
+          return;
+        }
 
-async function search(){
-  const raw=$('gi').value.trim(); if(!raw)return;
-  $('gd').value=raw.toLowerCase();
-  $('start').style.display='none'; $('empty').classList.remove('on');
-  $('sw').innerHTML=''; $('ldr').classList.add('on'); status('Scanning…','');
-  try{
-    await pickHost();
-    const tag=encodeURIComponent(raw.toLowerCase().replace(/\s+/g,'+'));
-    const res=await fetch(`${host}/json/stations/bytag/${tag}?limit=80&hidebroken=true&order=votes&reverse=true`,{signal:AbortSignal.timeout(8000)});
-    if(!res.ok)throw 0;
-    const data=await res.json();
-    render(data.filter(s=>s.url_resolved||s.url),raw);
-  }catch{status('Connection error — check internet','err');}
-  finally{$('ldr').classList.remove('on');}
-}
+        // Cloud Sync Mode
+        const safeId = encodeURIComponent(uuid).replace(/\./g, "%2E"); // Make safe for Firestore path
+        const docRef = doc(
+          db,
+          "artifacts",
+          appId,
+          "users",
+          userId,
+          "favorites",
+          safeId,
+        );
 
-function render(list,genre){
-  currentList = list;
-  const w=$('sw');
-  if(!list.length){$('empty').classList.add('on');status(`No stations for "${genre}"`,'');return;}
-  status(`${list.length} stations for "${genre}"`, 'ok');
-  const lbl=document.createElement('div');
-  lbl.className='sl'; lbl.textContent=`Stations (${list.length})`;
-  w.appendChild(lbl);
-  list.forEach((s,i)=>{
-    const uuid = getUuid(s);
-    const isFav = favs.some(f => getUuid(f) === uuid);
-    const card=document.createElement('div');
-    card.className='sc'; card.id=`sc-${uuid}`; 
-    card.onclick=(e)=>{
-      if(e.target.closest('.sfav')) return;
-      play(s, i);
-    };
-    const tags=(s.tags||'').split(',').filter(Boolean).slice(0,2).join(' · ');
-    const meta=[s.countrycode||'',tags].filter(Boolean).join(' · ');
-    const br=s.bitrate?s.bitrate+'k':'';
-    const icon=s.favicon&&s.favicon.startsWith('http')
-      ?`<div class="si"><img src="${e(s.favicon)}" onerror="this.parentNode.innerHTML='📻'" alt=""></div>`
-      :`<div class="si">📻</div>`;
-      
-    card.innerHTML=`
+        try {
+          if (isFav) {
+            await deleteDoc(docRef);
+            status("Removed from cloud favorites", "");
+          } else {
+            await setDoc(docRef, station);
+            status("Saved to cloud favorites", "ok");
+          }
+        } catch (e) {
+          console.error("Error saving favorite", e);
+          status("Error saving favorite", "err");
+        }
+      }
+
+      async function toggleCurrentFav() {
+        if (!cur) {
+          status("Select a station first", "");
+          return;
+        }
+        await toggleFavDB(cur);
+      }
+
+      async function toggleListFav(e, i) {
+        e.stopPropagation();
+        const s = currentList[i];
+        await toggleFavDB(s);
+      }
+
+      // PWA install
+      let dp = null;
+      window.addEventListener("beforeinstallprompt", (e) => {
+        e.preventDefault();
+        dp = e;
+        $("ib").classList.add("show");
+      });
+      $("ib-btn").onclick = async () => {
+        if (!dp) return;
+        dp.prompt();
+        await dp.userChoice;
+        dp = null;
+        $("ib").classList.remove("show");
+      };
+      $("ib-x").onclick = () => $("ib").classList.remove("show");
+      window.addEventListener("appinstalled", () =>
+        $("ib").classList.remove("show"),
+      );
+
+      async function pickHost() {
+        for (const h of APIS) {
+          try {
+            const r = await fetch(`${h}/json/stats`, {
+              signal: AbortSignal.timeout(3000),
+            });
+            if (r.ok) {
+              host = h;
+              return;
+            }
+          } catch {}
+        }
+      }
+
+      async function search() {
+        const raw = $("gi").value.trim();
+        if (!raw) return;
+        $("gd").value = raw.toLowerCase();
+        $("start").style.display = "none";
+        $("empty").classList.remove("on");
+        $("sw").innerHTML = "";
+        $("ldr").classList.add("on");
+        status("Scanning…", "");
+        try {
+          await pickHost();
+          const tag = encodeURIComponent(
+            raw.toLowerCase().replace(/\s+/g, "+"),
+          );
+          const res = await fetch(
+            `${host}/json/stations/bytag/${tag}?limit=80&hidebroken=true&order=votes&reverse=true`,
+            { signal: AbortSignal.timeout(8000) },
+          );
+          if (!res.ok) throw 0;
+          const data = await res.json();
+          render(
+            data.filter((s) => s.url_resolved || s.url),
+            raw,
+          );
+        } catch {
+          status("Connection error — check internet", "err");
+        } finally {
+          $("ldr").classList.remove("on");
+        }
+      }
+
+      function render(list, genre) {
+        currentList = list;
+        const w = $("sw");
+        if (!list.length) {
+          $("empty").classList.add("on");
+          status(`No stations for "${genre}"`, "");
+          return;
+        }
+        status(`${list.length} stations for "${genre}"`, "ok");
+        const lbl = document.createElement("div");
+        lbl.className = "sl";
+        lbl.textContent = `Stations (${list.length})`;
+        w.appendChild(lbl);
+        list.forEach((s, i) => {
+          const uuid = getUuid(s);
+          const isFav = favs.some((f) => getUuid(f) === uuid);
+          const card = document.createElement("div");
+          card.className = "sc";
+          card.id = `sc-${uuid}`;
+          card.onclick = (e) => {
+            if (e.target.closest(".sfav")) return;
+            play(s, i);
+          };
+          const tags = (s.tags || "")
+            .split(",")
+            .filter(Boolean)
+            .slice(0, 2)
+            .join(" · ");
+          const meta = [s.countrycode || "", tags].filter(Boolean).join(" · ");
+          const br = s.bitrate ? s.bitrate + "k" : "";
+          const icon =
+            s.favicon && s.favicon.startsWith("http")
+              ? `<div class="si"><img src="${e(s.favicon)}" onerror="this.parentNode.innerHTML='📻'" alt=""></div>`
+              : `<div class="si">📻</div>`;
+
+          card.innerHTML = `
       ${icon}
       <div class="sinfo">
-        <div class="sname">${e(s.name||'Unknown')}</div>
+        <div class="sname">${e(s.name || "Unknown")}</div>
         <div class="smeta">${e(meta)}</div>
       </div>
       <div class="sr2">
-        <button id="fav-btn-${uuid}" class="sfav ${isFav?'active':''}" onclick="window.toggleListFav(event, ${i})">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="${isFav?'currentColor':'none'}" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        <button id="fav-btn-${uuid}" class="sfav ${isFav ? "active" : ""}" onclick="window.toggleListFav(event, ${i})">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="${isFav ? "currentColor" : "none"}" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
         </button>
         <div class="sbr">${br}</div>
         <div class="slive">▶ LIVE</div>
       </div>
     `;
-    w.appendChild(card);
-  });
-}
+          w.appendChild(card);
+        });
+      }
 
-// RECONNECT LOGIC
-function clrRec(){ if(rtmr)clearTimeout(rtmr); rtmr=null; rcnt=0; }
+      // RECONNECT LOGIC
+      function clrRec() {
+        if (rtmr) clearTimeout(rtmr);
+        rtmr = null;
+        rcnt = 0;
+      }
 
-function tryRec(){
-  if(!intentPlay||!cur)return;
-  if(rtmr)clearTimeout(rtmr);
-  rcnt++;
-  status(`Reconnecting... attempt ${rcnt}`,'err');
-  setLoading();
-  rtmr=setTimeout(()=>{
-    if(!intentPlay||!cur)return;
-    status('Reconnecting...','');
-    au.load(); // Flush previous buffer
-    au.src=cur.url_resolved||cur.url;
-    au.play().catch(()=>{});
-  }, 5000); // Try again every 5 seconds
-}
+      function tryRec() {
+        if (!intentPlay || !cur) return;
+        if (rtmr) clearTimeout(rtmr);
+        rcnt++;
+        status(`Reconnecting... attempt ${rcnt}`, "err");
+        setLoading();
+        rtmr = setTimeout(() => {
+          if (!intentPlay || !cur) return;
+          status("Reconnecting...", "");
+          au.load(); // Flush previous buffer
+          au.src = cur.url_resolved || cur.url;
+          au.play().catch(() => {});
+        }, 5000); // Try again every 5 seconds
+      }
 
-function play(s,i){
-  const uuid = getUuid(s);
-  if(cur && getUuid(cur)===uuid && state!=='stopped'){togglePlay();return;}
-  stopRadio(false); cur={...s, i};
-  
-  intentPlay=true; clrRec(); // Track user intent
-  
-  document.querySelectorAll('.sc').forEach(c=>c.classList.remove('playing'));
-  const card=document.getElementById(`sc-${uuid}`);
-  if(card){card.classList.add('playing');card.scrollIntoView({behavior:'smooth',block:'nearest'});}
-  
-  updateFavBtn(uuid);
-  
-  $('np').classList.add('on');
-  $('np-name').textContent=s.name||'Unknown';
-  const tags=(s.tags||'').split(',').filter(Boolean).slice(0,3).join(' · ');
-  $('np-genre').textContent=tags||s.countrycode||'';
-  setLoading(); status('Connecting…','');
-  au.src=s.url_resolved||s.url;
-  au.volume=$('vol').value/100;
-  au.muted=muted;
-  au.play().catch(()=>{ tryRec(); });
-}
+      function play(s, i) {
+        const uuid = getUuid(s);
+        if (cur && getUuid(cur) === uuid && state !== "stopped") {
+          togglePlay();
+          return;
+        }
+        stopRadio(false);
+        cur = { ...s, i };
 
-function togglePlay(){
-  if(!cur){status('Select a station first','');return;}
-  if(au.paused) {
-    intentPlay=true;
-    au.play().catch(()=>tryRec());
-  } else {
-    intentPlay=false; clrRec(); // Clear user intent & timers
-    au.pause();
-    status('Paused','');
-    setPaused();
-  }
-}
+        intentPlay = true;
+        clrRec(); // Track user intent
 
-function stopRadio(clear=true){
-  intentPlay=false; clrRec(); // Clear user intent & timers
-  au.pause();au.src='';
-  if(clear){
-    cur=null;
-    $('np').classList.remove('on');
-    updateFavBtn('null'); // Reset star
-    status('Stopped','');
-  }
-  document.querySelectorAll('.sc').forEach(c=>c.classList.remove('playing'));
-  setStopped();
-}
+        document
+          .querySelectorAll(".sc")
+          .forEach((c) => c.classList.remove("playing"));
+        const card = document.getElementById(`sc-${uuid}`);
+        if (card) {
+          card.classList.add("playing");
+          card.scrollIntoView({ behavior: "smooth", block: "nearest" });
+        }
 
-function setVol(v){
-  au.volume=v/100;
-  if(v==0&&!muted){muted=true;muteBtn();}
-  else if(v>0&&muted){muted=false;au.muted=false;muteBtn();}
-}
-function toggleMute(){muted=!muted;au.muted=muted;muteBtn();}
-function muteBtn(){
-  $('bm').classList.toggle('muted',muted);
-  $('mi1').style.display=muted?'none':'';
-  $('mi2').style.display=muted?'':'none';
-}
+        updateFavBtn(uuid);
 
-function status(msg,cls){const b=$('sb');b.textContent=msg;b.className=cls||'';}
-function setLoading(){state='loading';$('pi').style.display='none';$('pai').style.display='none';$('li').style.display='';}
-function setPlaying(){state='playing';$('pi').style.display='none';$('pai').style.display='';$('li').style.display='none';document.body.classList.add('playing');}
-function setPaused(){state='paused';$('pi').style.display='';$('pai').style.display='none';$('li').style.display='none';document.body.classList.remove('playing');}
-function setStopped(){state='stopped';$('pi').style.display='';$('pai').style.display='none';$('li').style.display='none';document.body.classList.remove('playing');}
+        $("np").classList.add("on");
+        $("np-name").textContent = s.name || "Unknown";
+        const tags = (s.tags || "")
+          .split(",")
+          .filter(Boolean)
+          .slice(0, 3)
+          .join(" · ");
+        $("np-genre").textContent = tags || s.countrycode || "";
+        setLoading();
+        status("Connecting…", "");
+        au.src = s.url_resolved || s.url;
+        au.volume = $("vol").value / 100;
+        au.muted = muted;
+        au.play().catch(() => {
+          tryRec();
+        });
+      }
 
-function e(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+      function togglePlay() {
+        if (!cur) {
+          status("Select a station first", "");
+          return;
+        }
+        if (au.paused) {
+          intentPlay = true;
+          au.play().catch(() => tryRec());
+        } else {
+          intentPlay = false;
+          clrRec(); // Clear user intent & timers
+          au.pause();
+          status("Paused", "");
+          setPaused();
+        }
+      }
 
-au.addEventListener('playing',()=>{clrRec();status('▶ LIVE — '+(cur?.name||''),'ok');setPlaying();});
-au.addEventListener('waiting',()=>{status('Buffering…','');setLoading();});
-au.addEventListener('stalled',()=>status('Stream stalled…',''));
-au.addEventListener('pause',()=>{if(state!=='stopped')setPaused();});
+      function stopRadio(clear = true) {
+        intentPlay = false;
+        clrRec(); // Clear user intent & timers
+        au.pause();
+        au.src = "";
+        if (clear) {
+          cur = null;
+          $("np").classList.remove("on");
+          updateFavBtn("null"); // Reset star
+          status("Stopped", "");
+        }
+        document
+          .querySelectorAll(".sc")
+          .forEach((c) => c.classList.remove("playing"));
+        setStopped();
+      }
 
-au.addEventListener('error',()=>{
-  if(intentPlay) tryRec();
-  else { 
-    status('Stream error — try another','err');
-    setStopped();
-    if(cur) document.getElementById(`sc-${getUuid(cur)}`)?.classList.remove('playing'); 
-  }
-});
+      function setVol(v) {
+        au.volume = v / 100;
+        if (v == 0 && !muted) {
+          muted = true;
+          muteBtn();
+        } else if (v > 0 && muted) {
+          muted = false;
+          au.muted = false;
+          muteBtn();
+        }
+      }
+      function toggleMute() {
+        muted = !muted;
+        au.muted = muted;
+        muteBtn();
+      }
+      function muteBtn() {
+        $("bm").classList.toggle("muted", muted);
+        $("mi1").style.display = muted ? "none" : "";
+        $("mi2").style.display = muted ? "" : "none";
+      }
 
-// Live streams shouldn't usually fire ended, if they do, it's a disconnect.
-au.addEventListener('ended',()=>{ if(intentPlay) tryRec(); });
+      function status(msg, cls) {
+        const b = $("sb");
+        b.textContent = msg;
+        b.className = cls || "";
+      }
+      function setLoading() {
+        state = "loading";
+        $("pi").style.display = "none";
+        $("pai").style.display = "none";
+        $("li").style.display = "";
+      }
+      function setPlaying() {
+        state = "playing";
+        $("pi").style.display = "none";
+        $("pai").style.display = "";
+        $("li").style.display = "none";
+        document.body.classList.add("playing");
+      }
+      function setPaused() {
+        state = "paused";
+        $("pi").style.display = "";
+        $("pai").style.display = "none";
+        $("li").style.display = "none";
+        document.body.classList.remove("playing");
+      }
+      function setStopped() {
+        state = "stopped";
+        $("pi").style.display = "";
+        $("pai").style.display = "none";
+        $("li").style.display = "none";
+        document.body.classList.remove("playing");
+      }
 
-// Wake lock — keep screen on while playing
-let wl=null;
-async function wakeOn(){try{if('wakeLock'in navigator)wl=await navigator.wakeLock.request('screen');}catch{}}
-async function wakeOff(){if(wl){await wl.release();wl=null;}}
-au.addEventListener('playing',wakeOn);
-au.addEventListener('pause',wakeOff);
+      function e(s) {
+        return String(s)
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;");
+      }
 
-// Device connectivity detection
-window.addEventListener('offline', ()=>{
-  if(intentPlay){status('Offline. Waiting for network...','err');setLoading();}
-});
-window.addEventListener('online', ()=>{
-  if(intentPlay){clrRec(); tryRec();} // Immediate attempt when internet returns
-});
+      au.addEventListener("playing", () => {
+        clrRec();
+        status("▶ LIVE — " + (cur?.name || ""), "ok");
+        setPlaying();
+      });
+      au.addEventListener("waiting", () => {
+        status("Buffering…", "");
+        setLoading();
+      });
+      au.addEventListener("stalled", () => status("Stream stalled…", ""));
+      au.addEventListener("pause", () => {
+        if (state !== "stopped") setPaused();
+      });
 
-// EXPORT TO GLOBAL SCOPE FOR HTML ONCLICK BINDINGS
-window.togglePlay = togglePlay;
-window.setVol = setVol;
-window.toggleMute = toggleMute;
-window.search = search;
-window.onGenreSelect = onGenreSelect;
-window.onFavSelect = onFavSelect;
-window.toggleCurrentFav = toggleCurrentFav;
-window.toggleListFav = toggleListFav;
-window.signInGoogle = signInGoogle;
-</script>
+      au.addEventListener("error", () => {
+        if (intentPlay) tryRec();
+        else {
+          status("Stream error — try another", "err");
+          setStopped();
+          if (cur)
+            document
+              .getElementById(`sc-${getUuid(cur)}`)
+              ?.classList.remove("playing");
+        }
+      });
 
-<!-- Inline Service Worker for offline shell caching -->
-<script>
-if('serviceWorker'in navigator){
-  const sw=`
+      // Live streams shouldn't usually fire ended, if they do, it's a disconnect.
+      au.addEventListener("ended", () => {
+        if (intentPlay) tryRec();
+      });
+
+      // Wake lock — keep screen on while playing
+      let wl = null;
+      async function wakeOn() {
+        try {
+          if ("wakeLock" in navigator)
+            wl = await navigator.wakeLock.request("screen");
+        } catch {}
+      }
+      async function wakeOff() {
+        if (wl) {
+          await wl.release();
+          wl = null;
+        }
+      }
+      au.addEventListener("playing", wakeOn);
+      au.addEventListener("pause", wakeOff);
+
+      // Device connectivity detection
+      window.addEventListener("offline", () => {
+        if (intentPlay) {
+          status("Offline. Waiting for network...", "err");
+          setLoading();
+        }
+      });
+      window.addEventListener("online", () => {
+        if (intentPlay) {
+          clrRec();
+          tryRec();
+        } // Immediate attempt when internet returns
+      });
+
+      // EXPORT TO GLOBAL SCOPE FOR HTML ONCLICK BINDINGS
+      window.togglePlay = togglePlay;
+      window.setVol = setVol;
+      window.toggleMute = toggleMute;
+      window.search = search;
+      window.onGenreSelect = onGenreSelect;
+      window.onFavSelect = onFavSelect;
+      window.toggleCurrentFav = toggleCurrentFav;
+      window.toggleListFav = toggleListFav;
+      window.signInGoogle = signInGoogle;
+    </script>
+
+    <!-- Inline Service Worker for offline shell caching -->
+    <script>
+      if ("serviceWorker" in navigator) {
+        const sw = `
     const C='ether-v2';
     self.addEventListener('install',e=>{e.waitUntil(caches.open(C).then(c=>c.addAll([self.location.pathname])));self.skipWaiting();});
     self.addEventListener('activate',e=>{e.waitUntil(self.clients.claim());});
@@ -668,9 +1496,11 @@ if('serviceWorker'in navigator){
       e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request).catch(()=>caches.match(self.location.pathname))));
     });
   `;
-  const b=new Blob([sw],{type:'application/javascript'});
-  navigator.serviceWorker.register(URL.createObjectURL(b),{scope:'/'}).catch(()=>{});
-}
-</script>
-</body>
+        const b = new Blob([sw], { type: "application/javascript" });
+        navigator.serviceWorker
+          .register(URL.createObjectURL(b), { scope: "/" })
+          .catch(() => {});
+      }
+    </script>
+  </body>
 </html>
