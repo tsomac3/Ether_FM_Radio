@@ -198,7 +198,7 @@ body.playing .dot:nth-child(2){animation-delay:.15s;} body.playing .dot:nth-chil
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
 import { getAuth, signInWithCustomToken, signInAnonymously, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 import { getFirestore, collection, doc, setDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
+require("dotenv").config();
 const GENRES=['game','jazz','rock','pop','classical','electronic','hip hop','ambient','country','reggae','blues','soul','metal','punk','indie','lofi','news','talk','dance','techno','house'];
 const APIS=['https://de1.api.radio-browser.info','https://at1.api.radio-browser.info','https://nl1.api.radio-browser.info'];
 
@@ -227,12 +227,12 @@ const appId = typeof __app_id !== 'undefined' ? __app_id : 'ether-fm';
 // Your web app's Firebase configuration
 
 const firebaseConfig = {
-  apiKey: "AIzaSyB0zaq7SlbQ9eJv11Tr5GkN1OMpGkC6IdI",
-  authDomain: "ether-fm-ade95.firebaseapp.com",
-  projectId: "ether-fm-ade95",
-  storageBucket: "ether-fm-ade95.firebasestorage.app",
-  messagingSenderId: "11968135645",
-  appId: "1:11968135645:web:b086b365fd423805a67634"
+  apiKey: process.env.API_KEY,
+  authDomain: process.env.AUTH_DOMAIN,
+  projectId: process.env.PROJECT_ID,
+  storageBucket: process.env.STORAGE_BUCKET,
+  messagingSenderId: process.env.MESSAGING_SENDER_ID,
+  appId: process.env.APP_ID
 };
 
 // Initialize Firebase
